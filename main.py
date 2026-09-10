@@ -62,9 +62,11 @@ async def sipuni_webhook(request: Request):
     if not data:
         return {"status": "ok"}
 
-    call_id = str(data.get("call_id", ""))
+    print(f"📥 Sipuni дерегі түсті: {data}")
+
+    call_id = str(data.get("call_id") or data.get("id") or "")
     if not call_id:
-        return {"status": "ignored"}
+        return {"status": "ignored", "reason": "No call_id"}
 
     if call_id in PROCESSED_CALLS:
         return {"status": "already_processed"}
@@ -77,51 +79,60 @@ async def sipuni_webhook(request: Request):
     if status in ["NOANSWER", "BUSY", "CANCEL", "FAILED"]:
         return {"status": "ignored", "reason": status}
 
+    # Іздеу: ұзақтық әртүрлі параметрлерде болуы мүмкін
     duration = 0
-    if data.get("duration"):
-        try:
-            duration = int(data.get("duration") or 0)
-        except Exception:
-            duration = 0
-    elif data.get("call_answer_timestamp") and data.get("timestamp"):
-        try:
-            duration = int(data["timestamp"]) - int(data["call_answer_timestamp"])
-        except Exception:
-            duration = 0
-    elif data.get("call_start_timestamp") and data.get("timestamp"):
-        try:
-            duration = int(data["timestamp"]) - int(data["call_start_timestamp"])
-        except Exception:
-            duration = 0
+    for dur_key in ["duration", "talk_time", "billsec", "call_duration"]:
+        val = data.get(dur_key)
+        if val is not None:
+            try:
+                duration = int(val)
+                if duration > 0:
+                    break
+            except Exception:
+                pass
 
-    if duration < 40:
-        return {"status": "ignored", "reason": f"Short ({duration}s)"}
+    if duration == 0:
+        if data.get("call_answer_timestamp") and data.get("timestamp"):
+            try:
+                duration = int(data["timestamp"]) - int(data["call_answer_timestamp"])
+            except Exception:
+                pass
+        elif data.get("call_start_timestamp") and data.get("timestamp"):
+            try:
+                duration = int(data["timestamp"]) - int(data["call_start_timestamp"])
+            except Exception:
+                pass
 
-    record_url = data.get("call_record_link") or data.get("record_url") or data.get("link")
+    record_url = data.get("call_record_link") or data.get("record_url") or data.get("link") or data.get("record")
+    
+    # Егер аудио сілтемесі мүлдем жоқ болса, күтеміз
     if not record_url:
-        return {"status": "error", "reason": "No audio URL"}
+        return {"status": "ignored", "reason": f"No record link yet (duration={duration}s)"}
 
     PROCESSED_CALLS.add(call_id)
     if len(PROCESSED_CALLS) > 1000:
         PROCESSED_CALLS.clear()
 
-    print(f"🔄 ОКК аудиті: {call_id} ({duration} сек)...")
+    print(f"🔄 ОКК аудиті басталды: {call_id} ({duration} сек)...")
 
     try:
         safe_record_url = clean_url(str(record_url))
         audio_content = None
-        for _ in range(4):
+        for attempt in range(5):
             try:
                 res = requests.get(safe_record_url, timeout=60)
-                if res.status_code == 200 and len(res.content) > 3000:
+                if res.status_code == 200 and len(res.content) > 5000:
                     audio_content = res.content
                     break
+                else:
+                    print(f"Аудио жүктелуде (күйі: {res.status_code}), қайта тексеру {attempt+1}/5...")
             except Exception as dl_err:
                 print(f"Download retry error: {dl_err}")
-            time.sleep(3)
+            time.sleep(4)
 
         if not audio_content:
             print(f"❌ Аудио жүктелмеді: {safe_record_url}")
+            PROCESSED_CALLS.remove(call_id)
             return {"status": "error", "reason": "Download failed"}
 
         manager_num = str(data.get("short_src_num") or data.get("src_num") or "Белгісіз")
@@ -191,7 +202,7 @@ async def sipuni_webhook(request: Request):
         res_json = json.loads(text_content.strip())
 
         if not res_json.get("is_valid_conversation", True):
-            return {"status": "ignored"}
+            return {"status": "ignored", "reason": "Not a valid sales conversation"}
 
         mgr = res_json.get("manager_assessment", {})
         lead = res_json.get("lead_assessment", {})
