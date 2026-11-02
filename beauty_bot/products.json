@@ -1,0 +1,40 @@
+{
+  "shop_name": "Beauty Shop",
+  "currency": "₸",
+  "contacts": {
+    "phone": "+7 700 000 00 00",
+    "whatsapp": "https://wa.me/77000000000",
+    "instagram": "https://instagram.com/beautyshop",
+    "address": "Алматы қ., мекенжайды осында жазыңыз",
+    "hours": "Күн сайын 10:00–20:00"
+  },
+  "delivery": {
+    "options": [
+      {"id": "courier", "title": "🚚 Курьер (қала ішінде)", "price": 1000},
+      {"id": "pickup", "title": "🏬 Өзім алып кетемін", "price": 0},
+      {"id": "post", "title": "📦 Қазпошта / CDEK (облыстарға)", "price": 2000}
+    ],
+    "free_from": 20000
+  },
+  "categories": [
+    {"id": "face", "title": "🧴 Бетке күтім"},
+    {"id": "makeup", "title": "💄 Макияж"},
+    {"id": "hair", "title": "💇‍♀️ Шашқа күтім"},
+    {"id": "body", "title": "🛁 Денеге күтім"},
+    {"id": "perfume", "title": "🌸 Парфюм"}
+  ],
+  "products": [
+    {"id": "p1", "category": "face", "name": "Ылғалдандыратын крем", "price": 7900, "description": "Гиалурон қышқылы бар күнделікті крем. Барлық тері түріне. 50 мл.", "photo": ""},
+    {"id": "p2", "category": "face", "name": "Витамин C сарысуы", "price": 9500, "description": "Теріні жарқыратып, пигментті азайтады. 30 мл.", "photo": ""},
+    {"id": "p3", "category": "face", "name": "Жуынуға арналған көбік", "price": 4500, "description": "Нәзік тазартатын көбік, терені құрғатпайды. 150 мл.", "photo": ""},
+    {"id": "p4", "category": "face", "name": "Күннен қорғайтын крем SPF 50", "price": 6900, "description": "Жеңіл текстура, ақ із қалдырмайды. 50 мл.", "photo": ""},
+    {"id": "p5", "category": "makeup", "name": "Тональды крем", "price": 8900, "description": "Табиғи жабын, 24 сағатқа төзімді. 30 мл.", "photo": ""},
+    {"id": "p6", "category": "makeup", "name": "Тушь", "price": 5200, "description": "Көлем мен ұзындық береді, суға төзімді.", "photo": ""},
+    {"id": "p7", "category": "makeup", "name": "Матты ерін далабы", "price": 4900, "description": "Ұзаққа төзімді, ерінді құрғатпайды.", "photo": ""},
+    {"id": "p8", "category": "hair", "name": "Қалпына келтіретін шампунь", "price": 5900, "description": "Зақымданған шашқа арналған, кератинмен. 300 мл.", "photo": ""},
+    {"id": "p9", "category": "hair", "name": "Шаш майы", "price": 6500, "description": "Арган майы, шашқа жылтыр мен жұмсақтық береді. 100 мл.", "photo": ""},
+    {"id": "p10", "category": "body", "name": "Дене скрабы", "price": 4900, "description": "Кофе мен кокос майы бар скраб. 200 г.", "photo": ""},
+    {"id": "p11", "category": "body", "name": "Дене лосьоны", "price": 5500, "description": "Ши майымен терең ылғалдандыру. 250 мл.", "photo": ""},
+    {"id": "p12", "category": "perfume", "name": "Парфюм «Bloom»", "price": 18900, "description": "Гүлді-жемісті хош иіс. 50 мл.", "photo": ""}
+  ]
+}
