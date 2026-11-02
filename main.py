@@ -3,11 +3,90 @@ import time
 import json
 import base64
 from urllib.parse import quote, urlsplit, urlunsplit
+import sqlite3
+import secrets
+import threading
+from datetime import datetime
+from pathlib import Path
 import requests
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, HTTPException, status as http_status
+from fastapi.responses import HTMLResponse, Response
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import uvicorn
 
 app = FastAPI()
+
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "audits.db"))
+DASHBOARD_USER = os.getenv("DASHBOARD_USER", "admin")
+DASHBOARD_PASSWORD = os.getenv("DASHBOARD_PASSWORD", "")
+_db_lock = threading.Lock()
+security = HTTPBasic(auto_error=False)
+
+
+def init_db():
+    with _db_lock, sqlite3.connect(DB_PATH) as con:
+        con.execute(
+            """CREATE TABLE IF NOT EXISTS audits (
+                call_id TEXT PRIMARY KEY,
+                created_at TEXT NOT NULL,
+                duration INTEGER,
+                manager_num TEXT,
+                client_num TEXT,
+                record_url TEXT,
+                manager_score INTEGER,
+                lead_category TEXT,
+                lead_score INTEGER,
+                critical INTEGER,
+                result_json TEXT NOT NULL
+            )"""
+        )
+
+
+def save_audit(call_id, duration, manager_num, client_num, record_url, res_json):
+    mgr = res_json.get("manager_assessment", {}) or {}
+    lead = res_json.get("lead_assessment", {}) or {}
+
+    def to_int(v):
+        try:
+            return int(float(v))
+        except Exception:
+            return None
+
+    with _db_lock, sqlite3.connect(DB_PATH) as con:
+        con.execute(
+            "INSERT OR REPLACE INTO audits VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+            (
+                call_id,
+                datetime.now().isoformat(timespec="seconds"),
+                duration,
+                manager_num,
+                client_num,
+                record_url,
+                to_int(mgr.get("total_score")),
+                str(lead.get("category") or ""),
+                to_int(lead.get("total_score")),
+                1 if mgr.get("critical_violation") else 0,
+                json.dumps(res_json, ensure_ascii=False),
+            ),
+        )
+
+
+def require_auth(credentials: HTTPBasicCredentials = Depends(security)):
+    """Егер DASHBOARD_PASSWORD орнатылса, сайтқа логин/пароль арқылы ғана кіруге болады."""
+    if not DASHBOARD_PASSWORD:
+        return
+    ok = credentials is not None and secrets.compare_digest(
+        credentials.username, DASHBOARD_USER
+    ) and secrets.compare_digest(credentials.password, DASHBOARD_PASSWORD)
+    if not ok:
+        raise HTTPException(
+            status_code=http_status.HTTP_401_UNAUTHORIZED,
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+
+init_db()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AQ.Ab8RN6IMRm-4XobyP1JW309UYhgcMliLZNmrAeGAK84Sd7vSsw")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8824137911:AAEUUH7Sw7KFmaur1k4MLdoRp4k2sGVeyE4")
@@ -35,7 +114,38 @@ def send_telegram(text: str):
     except Exception as e:
         print(f"Telegram қатесі: {e}")
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
+async def root(request: Request, credentials: HTTPBasicCredentials = Depends(security)):
+    # Sipuni GET арқылы түбірге жіберсе — вебхук ретінде өңдейміз (парольсіз)
+    if request.query_params:
+        return await sipuni_webhook(request)
+    require_auth(credentials)
+    return HTMLResponse((BASE_DIR / "static" / "index.html").read_text(encoding="utf-8"))
+
+
+@app.get("/api/audits")
+def api_audits(limit: int = 500, _=Depends(require_auth)):
+    with _db_lock, sqlite3.connect(DB_PATH) as con:
+        con.row_factory = sqlite3.Row
+        rows = con.execute(
+            "SELECT * FROM audits ORDER BY created_at DESC LIMIT ?", (min(limit, 5000),)
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["result"] = json.loads(d.pop("result_json"))
+        out.append(d)
+    return out
+
+
+@app.delete("/api/audits/{call_id}")
+def api_delete(call_id: str, _=Depends(require_auth)):
+    with _db_lock, sqlite3.connect(DB_PATH) as con:
+        con.execute("DELETE FROM audits WHERE call_id = ?", (call_id,))
+    return {"status": "deleted"}
+
+
+@app.post("/")
 @app.get("/sipuni-webhook")
 @app.post("/sipuni-webhook")
 @app.get("/webhook")
@@ -247,6 +357,10 @@ async def sipuni_webhook(request: Request):
             f"💡 <b>РОП СКРИПТІ:</b>\n«{mgr.get('recommendation_script', '')}»"
         ]
         report = "\n".join(report_lines)
+        try:
+            save_audit(call_id, duration, manager_num, client_num, safe_record_url, res_json)
+        except Exception as db_err:
+            print(f"DB қатесі: {db_err}")
         send_telegram(report)
         print(f"✅ ОКК есебі ({call_id}) Telegram-ға жіберілді!")
 
