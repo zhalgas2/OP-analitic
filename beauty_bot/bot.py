@@ -117,7 +117,7 @@ def apply_settings():
         k, v = r["key"], r["value"]
         if k.startswith("photo:") and k[6:] in PRODUCTS:
             PRODUCTS[k[6:]]["photo"] = v
-        elif k in ("whatsapp", "phone"):
+        elif k in ("whatsapp", "phone", "instagram", "address", "hours"):
             contacts[k] = v
 
 
@@ -586,6 +586,9 @@ ADMIN_HELP = (
     "🛠 <b>Админ командалары</b>\n\n"
     "📸 <b>Тауарға фото қосу:</b> ботқа фотоны жай жіберіңіз → қай тауарға екенін батырмамен таңдаңыз.\n"
     "💬 <b>WhatsApp нөмірі:</b> <code>/whatsapp 77011234567</code>\n"
+    "📸 <b>Instagram:</b> <code>/instagram username</code>\n"
+    "📍 <b>Мекенжай:</b> <code>/address Алматы, Абай 10</code>\n"
+    "🕒 <b>Жұмыс уақыты:</b> <code>/hours Күн сайын 10:00–20:00</code>\n"
     "📦 <b>Соңғы тапсырыстар:</b> /orders\n"
     "🆔 <b>Өз id-іңіз:</b> /myid"
 )
@@ -644,6 +647,37 @@ async def admin_whatsapp(m: Message):
     setting_set("whatsapp", wa)
     setting_set("phone", phone)
     await m.answer(f"✅ WhatsApp сақталды: {phone}\n«📞 Байланыс» бөлімінде көрінеді.")
+
+
+@router.message(Command("instagram"))
+async def admin_instagram(m: Message):
+    if m.from_user.id not in ADMIN_IDS:
+        return
+    parts = (m.text or "").split(maxsplit=1)
+    raw = parts[1].strip() if len(parts) > 1 else ""
+    # https://www.instagram.com/name/?igsh=... немесе @name немесе name — бәрін қабылдаймыз
+    name = raw.split("instagram.com/")[-1].split("?")[0].strip("/ @")
+    if not name or not all(ch.isalnum() or ch in "._" for ch in name):
+        return await m.answer("Instagram атыңызды осылай жазыңыз:\n<code>/instagram beautyshop_kz</code>")
+    url = f"https://instagram.com/{name}"
+    CATALOG.setdefault("contacts", {})["instagram"] = url
+    setting_set("instagram", url)
+    await m.answer(f"✅ Instagram сақталды: {url}\n«📞 Байланыс» бөлімінде көрінеді.")
+
+
+@router.message(Command("address", "hours"))
+async def admin_text_contact(m: Message):
+    if m.from_user.id not in ADMIN_IDS:
+        return
+    key = m.text.split()[0].lstrip("/").split("@")[0]
+    parts = m.text.split(maxsplit=1)
+    if len(parts) < 2 or len(parts[1].strip()) < 3:
+        example = "/address Алматы, Абай 10" if key == "address" else "/hours Күн сайын 10:00–20:00"
+        return await m.answer(f"Осылай жазыңыз:\n<code>{example}</code>")
+    value = parts[1].strip()[:200]
+    CATALOG.setdefault("contacts", {})[key] = value
+    setting_set(key, value)
+    await m.answer(f"✅ Сақталды: {e(value)}")
 
 
 @router.message(StateFilter(Checkout.name, Checkout.address, Checkout.comment))
