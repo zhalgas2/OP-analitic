@@ -28,6 +28,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
+    FSInputFile,
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -90,6 +91,7 @@ def init_db():
                 user_id INTEGER, product_id TEXT, qty INTEGER,
                 PRIMARY KEY (user_id, product_id)
             );
+            CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER, username TEXT, name TEXT, phone TEXT,
@@ -99,6 +101,24 @@ def init_db():
             );
             """
         )
+
+
+def setting_set(key: str, value: str):
+    with db() as con:
+        con.execute("INSERT OR REPLACE INTO settings VALUES (?,?)", (key, value))
+
+
+def apply_settings():
+    """Админ бот арқылы өзгерткен баптауларды (фото, WhatsApp) каталогқа қолданады."""
+    with db() as con:
+        rows = con.execute("SELECT key, value FROM settings").fetchall()
+    contacts = CATALOG.setdefault("contacts", {})
+    for r in rows:
+        k, v = r["key"], r["value"]
+        if k.startswith("photo:") and k[6:] in PRODUCTS:
+            PRODUCTS[k[6:]]["photo"] = v
+        elif k in ("whatsapp", "phone"):
+            contacts[k] = v
 
 
 def cart_get(uid: int) -> list[tuple[dict, int]]:
@@ -306,7 +326,10 @@ async def send_product(cb: CallbackQuery, p: dict):
     kb = product_kb(p, qty)
     if p.get("photo"):
         await cb.message.delete()
-        await cb.message.answer_photo(p["photo"], caption=product_text(p), reply_markup=kb)
+        photo = p["photo"]
+        if not photo.startswith("http") and (BASE_DIR / photo).is_file():
+            photo = FSInputFile(BASE_DIR / photo)
+        await cb.message.answer_photo(photo, caption=product_text(p), reply_markup=kb)
     else:
         await show(cb, product_text(p), kb)
 
@@ -555,6 +578,74 @@ async def admin_orders(m: Message):
         await m.answer(order_text(o, for_admin=True), reply_markup=admin_order_kb(o["id"]))
 
 
+# ── Админ: фото және WhatsApp ──
+
+PENDING_PHOTO: dict[int, str] = {}
+
+ADMIN_HELP = (
+    "🛠 <b>Админ командалары</b>\n\n"
+    "📸 <b>Тауарға фото қосу:</b> ботқа фотоны жай жіберіңіз → қай тауарға екенін батырмамен таңдаңыз.\n"
+    "💬 <b>WhatsApp нөмірі:</b> <code>/whatsapp 77011234567</code>\n"
+    "📦 <b>Соңғы тапсырыстар:</b> /orders\n"
+    "🆔 <b>Өз id-іңіз:</b> /myid"
+)
+
+
+@router.message(Command("admin"))
+async def admin_help(m: Message):
+    if m.from_user.id in ADMIN_IDS:
+        await m.answer(ADMIN_HELP)
+    else:
+        await m.answer("Бұл команда тек админге арналған. Алдымен /myid арқылы id-іңізді біліп, "
+                       "ботты ADMIN_IDS айнымалысымен іске қосыңыз.")
+
+
+@router.message(StateFilter(None), F.photo)
+async def admin_photo(m: Message):
+    if m.from_user.id not in ADMIN_IDS:
+        return await m.answer("Төмендегі мәзірді қолданыңыз 👇", reply_markup=MAIN_KB)
+    PENDING_PHOTO[m.from_user.id] = m.photo[-1].file_id
+    rows = [[(f"{'🖼 ' if p.get('photo') else ''}{p['name']}", f"setph:{p['id']}")] for p in CATALOG["products"]]
+    rows.append([("❌ Болдырмау", "setph:-")])
+    await m.answer("📸 Бұл фото қай тауарға?", reply_markup=ikb(rows))
+
+
+@router.callback_query(F.data.startswith("setph:"))
+async def cb_set_photo(cb: CallbackQuery):
+    if cb.from_user.id not in ADMIN_IDS:
+        return await cb.answer("Рұқсат жоқ", show_alert=True)
+    pid = cb.data.split(":", 1)[1]
+    file_id = PENDING_PHOTO.pop(cb.from_user.id, None)
+    if pid == "-" or pid not in PRODUCTS:
+        await cb.message.edit_text("Болдырылмады.")
+        return await cb.answer()
+    if not file_id:
+        return await cb.answer("Фотоны қайта жіберіңіз", show_alert=True)
+    PRODUCTS[pid]["photo"] = file_id
+    setting_set(f"photo:{pid}", file_id)
+    await cb.message.edit_text(f"✅ Фото қосылды: <b>{e(PRODUCTS[pid]['name'])}</b>\n\n"
+                               "Келесі фотоны жіберсеңіз болады.")
+    await cb.answer("Сақталды")
+
+
+@router.message(Command("whatsapp"))
+async def admin_whatsapp(m: Message):
+    if m.from_user.id not in ADMIN_IDS:
+        return
+    digits = "".join(ch for ch in (m.text or "").split(maxsplit=1)[-1] if ch.isdigit())
+    if len(digits) < 10:
+        return await m.answer("Нөмірді осылай жазыңыз:\n<code>/whatsapp 77011234567</code>")
+    if len(digits) == 11 and digits.startswith("8"):
+        digits = "7" + digits[1:]
+    elif len(digits) == 10:
+        digits = "7" + digits
+    wa, phone = f"https://wa.me/{digits}", f"+{digits}"
+    CATALOG.setdefault("contacts", {}).update(whatsapp=wa, phone=phone)
+    setting_set("whatsapp", wa)
+    setting_set("phone", phone)
+    await m.answer(f"✅ WhatsApp сақталды: {phone}\n«📞 Байланыс» бөлімінде көрінеді.")
+
+
 @router.message(StateFilter(Checkout.name, Checkout.address, Checkout.comment))
 async def need_text(m: Message):
     await m.answer("Мәтінмен жазыңыз немесе «❌ Болдырмау» басыңыз.")
@@ -580,6 +671,7 @@ async def main():
     if not ADMIN_IDS:
         log.warning("ADMIN_IDS бос — тапсырыстар ешкімге жіберілмейді. /myid арқылы id-іңізді біліңіз.")
     init_db()
+    apply_settings()
     bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     await bot.delete_webhook(drop_pending_updates=False)
     await build_dispatcher().start_polling(bot)
