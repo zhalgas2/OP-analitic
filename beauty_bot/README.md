@@ -55,3 +55,17 @@ Beauty тауарларын сататын дүкенге арналған Teleg
 
 > ⚠️ Токенді кодқа немесе GitHub-қа жазбаңыз — тек айнымалы (environment variable) арқылы беріңіз.
 > Хостингте `shop.db` сақталуы үшін тұрақты диск керек.
+
+## Mac-та фонда тұрақты жұмыс істету (Terminal-сыз)
+
+```bash
+cd ~/OP-analitic && git pull && bash beauty_bot/install_mac.sh "BOT_TOKEN" "ADMIN_ID"
+```
+
+Бот Mac қосылғанда өзі іске қосылады, құласа қайта қосылады. Terminal-ды жаба беруге болады.
+
+- Күйін тексеру: `bash ~/OP-analitic/beauty_bot/install_mac.sh status`
+- Тоқтату: `bash ~/OP-analitic/beauty_bot/install_mac.sh stop`
+- Жаңарту: `git pull`, содан кейін орнату командасын қайта іске қосыңыз.
+
+Mac ұйықтап қалса (қақпағы жабық), бот уақытша жауап бермейді.
