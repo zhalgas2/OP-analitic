@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FitLine KZ — тренажёры для дома</title>
+  <title>Igrmm — тренажёры для дома</title>
   <meta name="description" content="Беговые дорожки, велотренажёры и силовое оборудование с доставкой по Казахстану. Гарантия, рассрочка 0%.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -34,12 +34,11 @@
 
 <header class="header" id="top">
   <div class="container header__row">
-    <a href="#top" class="logo" data-brand>FitLine KZ</a>
+    <a href="#top" class="logo" data-brand>Igrmm</a>
     <nav class="nav" id="nav">
       <a href="#catalog" data-i18n="nav.catalog">Каталог</a>
       <a href="#benefits" data-i18n="nav.benefits">Преимущества</a>
       <a href="#delivery" data-i18n="nav.delivery">Доставка и оплата</a>
-      <a href="#reviews" data-i18n="nav.reviews">Отзывы</a>
       <a href="#contacts" data-i18n="nav.contacts">Контакты</a>
     </nav>
     <div class="header__actions">
@@ -47,8 +46,8 @@
         <button type="button" data-lang="ru" class="is-active">RU</button>
         <button type="button" data-lang="kz">KZ</button>
       </div>
-      <a class="header__phone" data-phone-link href="tel:+77000000000">
-        <svg class="ic"><use href="#i-phone"/></svg><span data-phone>+7 700 000 00 00</span>
+      <a class="header__phone" data-phone-link href="tel:+77056092750">
+        <svg class="ic"><use href="#i-phone"/></svg><span data-phone>+7 705 609 27 50</span>
       </a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>
@@ -68,15 +67,14 @@
           <a href="#contacts" class="btn btn--ghost" data-i18n="hero.cta2">Получить консультацию</a>
         </div>
         <ul class="hero__stats">
-          <li><b>3</b><span data-i18n="hero.stat1">лет гарантии</span></li>
-          <li><b>100+</b><span data-i18n="hero.stat2">моделей в наличии</span></li>
           <li><b>0%</b><span data-i18n="hero.stat3">рассрочка</span></li>
+          <li><b data-i18n="hero.stat1v">РК</b><span data-i18n="hero.stat1">доставка по Казахстану</span></li>
+          <li><b data-cat-count>6</b><span data-i18n="hero.stat2">категорий</span></li>
         </ul>
       </div>
-      <div class="hero__visual" aria-hidden="true">
-        <div class="hero__circle"></div>
-        <svg class="hero__icon"><use href="#i-treadmill"/></svg>
-        <div class="hero__price"><small>от</small> 189 000 ₸</div>
+      <div class="hero__visual">
+        <img src="img/treadmill.jpg" alt="" width="719" height="714">
+        <div class="hero__price"><small data-i18n="hero.from">от</small> <span data-min-price="treadmill"></span></div>
       </div>
     </div>
   </section>
@@ -84,7 +82,8 @@
   <!-- CATEGORIES -->
   <section class="section" id="categories">
     <div class="container">
-      <h2 data-i18n="cats.title">Категории</h2>
+      <span class="eyebrow" data-i18n="cats.eyebrow">Наш</span>
+      <h2 data-i18n="cats.title">Каталог продукции</h2>
       <div class="cats" id="cats"></div>
     </div>
   </section>
@@ -103,6 +102,7 @@
           </select>
         </label>
       </div>
+      <div class="chips" id="chips" role="group"></div>
       <div class="grid" id="products"></div>
     </div>
   </section>
@@ -133,19 +133,6 @@
     </div>
   </section>
 
-  <!-- REVIEWS -->
-  <section class="section" id="reviews">
-    <div class="container">
-      <h2 data-i18n="reviews.title">Отзывы покупателей</h2>
-      <p class="muted small" data-i18n="reviews.note"></p>
-      <div class="reviews">
-        <figure class="review"><div class="stars"></div><blockquote data-i18n="r1.t"></blockquote><figcaption data-i18n="r1.n"></figcaption></figure>
-        <figure class="review"><div class="stars"></div><blockquote data-i18n="r2.t"></blockquote><figcaption data-i18n="r2.n"></figcaption></figure>
-        <figure class="review"><div class="stars"></div><blockquote data-i18n="r3.t"></blockquote><figcaption data-i18n="r3.n"></figcaption></figure>
-      </div>
-    </div>
-  </section>
-
   <!-- FAQ -->
   <section class="section section--alt" id="faq">
     <div class="container container--narrow">
@@ -166,11 +153,11 @@
         <h2 data-i18n="form.title">Нужна консультация?</h2>
         <p data-i18n="form.text"></p>
         <ul class="contacts">
-          <li><svg class="ic"><use href="#i-phone"/></svg><a data-phone-link data-phone href="tel:+77000000000">+7 700 000 00 00</a></li>
+          <li><svg class="ic"><use href="#i-phone"/></svg><a data-phone-link data-phone href="tel:+77056092750">+7 705 609 27 50</a></li>
           <li><svg class="ic"><use href="#i-wa"/></svg><a data-wa-link target="_blank" rel="noopener" href="#">WhatsApp</a></li>
-          <li><svg class="ic"><use href="#i-ig"/></svg><a data-ig-link target="_blank" rel="noopener" href="#">Instagram</a></li>
-          <li><span class="muted" data-address></span></li>
-          <li><span class="muted" data-hours></span></li>
+          <li data-ig-item><svg class="ic"><use href="#i-ig"/></svg><a data-ig-link target="_blank" rel="noopener" href="#">Instagram</a></li>
+          <li data-address-item><span class="muted" data-address></span></li>
+          <li data-hours-item><span class="muted" data-hours></span></li>
         </ul>
       </div>
       <form class="form card" id="leadForm" novalidate></form>
@@ -181,8 +168,8 @@
 <footer class="footer">
   <div class="container footer__row">
     <div>
-      <div class="logo" data-brand>FitLine KZ</div>
-      <p class="muted small">© <span id="year"></span> <span data-brand>FitLine KZ</span>. <span data-i18n="footer.rights"></span></p>
+      <div class="logo" data-brand>Igrmm</div>
+      <p class="muted small">© <span id="year"></span> <span data-brand>Igrmm</span>. <span data-i18n="footer.rights"></span></p>
     </div>
     <nav class="footer__nav">
       <a href="#catalog" data-i18n="footer.catalog"></a>

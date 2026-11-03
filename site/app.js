@@ -23,9 +23,18 @@
     $$("[data-phone]").forEach(function (el) { el.textContent = S.phone; });
     $$("[data-phone-link]").forEach(function (el) { el.href = "tel:" + S.phone.replace(/[^\d+]/g, ""); });
     $$("[data-wa-link]").forEach(function (el) { el.href = waUrl(); });
-    $$("[data-ig-link]").forEach(function (el) { el.href = S.instagram; });
-    $$("[data-address]").forEach(function (el) { el.textContent = S.address[state.lang]; });
-    $$("[data-hours]").forEach(function (el) { el.textContent = S.hours[state.lang]; });
+    $$("[data-ig-link]").forEach(function (el) { el.href = S.instagram || "#"; });
+    $$("[data-ig-item]").forEach(function (el) { el.hidden = !S.instagram; });
+    $$("[data-address]").forEach(function (el) { el.textContent = (S.address && S.address[state.lang]) || ""; });
+    $$("[data-address-item]").forEach(function (el) { el.hidden = !(S.address && S.address[state.lang]); });
+    $$("[data-hours]").forEach(function (el) { el.textContent = (S.hours && S.hours[state.lang]) || ""; });
+    $$("[data-hours-item]").forEach(function (el) { el.hidden = !(S.hours && S.hours[state.lang]); });
+    $$("[data-min-price]").forEach(function (el) {
+      var cat = el.getAttribute("data-min-price");
+      var list = PRODUCTS.filter(function (p) { return !cat || p.cat === cat; });
+      if (list.length) el.textContent = money(Math.min.apply(null, list.map(function (p) { return p.price; })));
+    });
+    $$("[data-cat-count]").forEach(function (el) { el.textContent = CATS.length; });
     $("#year").textContent = new Date().getFullYear();
     var star = '<svg><use href="#i-star"/></svg>';
     $$(".stars").forEach(function (el) { el.innerHTML = star + star + star + star + star; });
@@ -45,21 +54,27 @@
   }
 
   /* ---------- Categories ---------- */
+  function inCat(id) { return PRODUCTS.filter(function (p) { return p.cat === id; }); }
   function renderCats() {
-    var html = '<button type="button" class="cat' + (state.cat === "all" ? " is-active" : "") + '" data-cat="all">' +
-      '<svg><use href="#i-all"/></svg>' + esc(t("cats.all")) + "</button>";
-    CATS.forEach(function (c) {
-      html += '<button type="button" class="cat' + (state.cat === c.id ? " is-active" : "") + '" data-cat="' + c.id + '">' +
-        '<svg><use href="#i-' + c.icon + '"/></svg>' + esc(c[state.lang]) + "</button>";
-    });
-    $("#cats").innerHTML = html;
+    $("#cats").innerHTML = CATS.map(function (c) {
+      var items = inCat(c.id);
+      var withImg = items.filter(function (p) { return p.img; })[0];
+      var media = withImg
+        ? '<img src="' + esc(withImg.img) + '" alt="" loading="lazy" class="fit-' + (withImg.fit || "contain") + '">'
+        : '<svg><use href="#i-all"/></svg>';
+      return '<button type="button" class="cat" data-cat="' + c.id + '">' +
+        '<span class="cat__img">' + media + '</span>' +
+        '<span class="cat__foot"><span class="cat__name">' + esc(c[state.lang]) +
+        '<small>' + esc(t("cats.count", { n: items.length })) + '</small></span>' +
+        '<span class="cat__arrow" aria-hidden="true">→</span></span></button>';
+    }).join("");
+    var chips = [{ id: "all", name: t("cats.all") }].concat(CATS.map(function (c) { return { id: c.id, name: c[state.lang] }; }));
+    $("#chips").innerHTML = chips.map(function (c) {
+      return '<button type="button" class="chip' + (state.cat === c.id ? " is-active" : "") + '" data-cat="' + c.id + '" aria-pressed="' + (state.cat === c.id) + '">' + esc(c.name) + "</button>";
+    }).join("");
   }
 
   /* ---------- Products ---------- */
-  function iconFor(catId) {
-    for (var i = 0; i < CATS.length; i++) if (CATS[i].id === catId) return CATS[i].icon;
-    return "all";
-  }
   function renderProducts() {
     var list = PRODUCTS.filter(function (p) { return state.cat === "all" || p.cat === state.cat; });
     if (state.sort === "asc") list.sort(function (a, b) { return a.price - b.price; });
@@ -72,7 +87,9 @@
       var badge = p.badge ? '<span class="badge badge--' + p.badge + '">' + esc(t("badge." + p.badge)) + "</span>" : "";
       var monthly = Math.ceil(p.price / 12 / 100) * 100;
       return '<article class="product card">' +
-        '<div class="product__img">' + badge + '<svg><use href="#i-' + iconFor(p.cat) + '"/></svg></div>' +
+        '<div class="product__img">' + badge + (p.img
+          ? '<img src="' + esc(p.img) + '" alt="' + esc(L.name) + '" loading="lazy" class="fit-' + (p.fit || "contain") + '">'
+          : '<svg><use href="#i-all"/></svg>') + '</div>' +
         '<div class="product__body">' +
           '<h3 class="product__name">' + esc(L.name) + "</h3>" +
           '<ul class="product__specs">' + L.specs.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ul>" +
@@ -101,17 +118,19 @@
     $$("input", form).forEach(function (i) { if (keep[i.name]) i.value = keep[i.name]; });
   }
 
+  // Нөмір әрқашан +7-ден басталады; пайдаланушы тек жергілікті 10 цифрды тереді.
+  // +7/8 қосып терсе немесе толық нөмірді қойса, ел коды алып тасталады.
   function formatPhone(value) {
     var d = value.replace(/\D/g, "");
-    if (d.charAt(0) === "8") d = "7" + d.slice(1);
-    if (d && d.charAt(0) !== "7") d = "7" + d;
-    d = d.slice(0, 11);
-    var r = d ? "+7" : "";
-    if (d.length > 1) r += " (" + d.slice(1, 4);
-    if (d.length >= 4) r += ")";
-    if (d.length > 4) r += " " + d.slice(4, 7);
-    if (d.length > 7) r += "-" + d.slice(7, 9);
-    if (d.length > 9) r += "-" + d.slice(9, 11);
+    if (/^\s*\+7/.test(value)) d = d.slice(1);
+    else if (d.length === 11 && /^[78]/.test(d)) d = d.slice(1);
+    d = d.slice(0, 10);
+    var r = "+7";
+    if (d.length) r += " (" + d.slice(0, 3);
+    if (d.length >= 3) r += ")";
+    if (d.length > 3) r += " " + d.slice(3, 6);
+    if (d.length > 6) r += "-" + d.slice(6, 8);
+    if (d.length > 8) r += "-" + d.slice(8, 10);
     return r;
   }
 
@@ -132,9 +151,10 @@
     if (product && product.value.trim()) msg += t("form.msgProduct", { product: product.value.trim() });
 
     var note = $(".form__ok", form);
-    if (!note) { note = document.createElement("p"); note.className = "form__ok"; form.appendChild(note); }
-    note.textContent = t("form.ok");
-    window.open(waUrl(msg), "_blank", "noopener");
+    if (!note) { note = document.createElement("div"); note.className = "form__ok"; form.appendChild(note); }
+    note.innerHTML = "<p>" + esc(t("form.ok")) + '</p><a class="btn btn--wa btn--block" target="_blank" rel="noopener" href="' +
+      esc(waUrl(msg)) + '">' + esc(t("form.openWa")) + "</a>";
+    $("a", note).focus();
   }
 
   /* ---------- Modal ---------- */
@@ -181,6 +201,17 @@
   document.addEventListener("input", function (e) {
     if (e.target.name === "phone") e.target.value = formatPhone(e.target.value);
     if (e.target.closest(".field.has-error")) setErr(e.target);
+  });
+
+  document.addEventListener("focusin", function (e) {
+    var el = e.target;
+    if (el.name !== "phone" || el.value) return;
+    el.value = "+7 ";
+    // Тышқанмен басқанда браузер курсорды фокустан кейін қояды, сондықтан соңына келесі тікте жылжытамыз
+    setTimeout(function () { try { el.setSelectionRange(el.value.length, el.value.length); } catch (err) {} }, 0);
+  });
+  document.addEventListener("focusout", function (e) {
+    if (e.target.name === "phone" && e.target.value.replace(/\D/g, "").length <= 1) e.target.value = "";
   });
 
   document.addEventListener("submit", function (e) {
