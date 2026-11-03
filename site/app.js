@@ -11,6 +11,12 @@
     if (vars) Object.keys(vars).forEach(function (k) { s = s.split("{" + k + "}").join(vars[k]); });
     return s;
   }
+  // Орыс тіліндегі көпше түр: 1 товар, 2 товара, 5 товаров (key1 / key2 / key5)
+  function tCount(key, n) {
+    var a = n % 10, b = n % 100;
+    var form = (a === 1 && b !== 11) ? "1" : (a >= 2 && a <= 4 && (b < 12 || b > 14)) ? "2" : "5";
+    return t(key + form, { n: n });
+  }
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
   function money(n) { return n.toLocaleString("ru-RU").replace(/,/g, " ") + " " + S.currency; }
@@ -65,7 +71,7 @@
       return '<button type="button" class="cat" data-cat="' + c.id + '">' +
         '<span class="cat__img">' + media + '</span>' +
         '<span class="cat__foot"><span class="cat__name">' + esc(c[state.lang]) +
-        '<small>' + esc(t("cats.count", { n: items.length })) + '</small></span>' +
+        '<small>' + esc(tCount("cats.count", items.length)) + '</small></span>' +
         '<span class="cat__arrow" aria-hidden="true">→</span></span></button>';
     }).join("");
     var chips = [{ id: "all", name: t("cats.all") }].concat(CATS.map(function (c) { return { id: c.id, name: c[state.lang] }; }));
@@ -186,9 +192,11 @@
       try { localStorage.setItem("lang", state.lang); } catch (err) {}
       applyLang();
     } else if ((el = e.target.closest("[data-cat]"))) {
+      // Қайта салудан бұрын тексереміз: renderCats() басылған батырманы DOM-нан алып тастайды
+      var fromCats = !!el.closest("#categories");
       state.cat = el.dataset.cat;
       renderCats(); renderProducts();
-      if (el.closest("#categories")) $("#catalog").scrollIntoView({ behavior: "smooth" });
+      if (fromCats) $("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
     } else if ((el = e.target.closest("[data-order]"))) {
       openModal(Number(el.dataset.order));
     } else if (e.target.closest("[data-close]")) {
