@@ -17,7 +17,7 @@ window.I18N = {
     "hero.stat2": "категорий",
     "hero.stat3": "рассрочка",
 
-    "cats.eyebrow": "Наш", "cats.title": "Каталог продукции", "cats.count": "{n} товаров",
+    "cats.eyebrow": "Наш", "cats.title": "Каталог продукции", "cats.count1": "{n} товар", "cats.count2": "{n} товара", "cats.count5": "{n} товаров",
     "cats.all": "Все товары",
 
     "catalog.title": "Товары",
@@ -100,7 +100,7 @@ window.I18N = {
     "hero.stat2": "санат",
     "hero.stat3": "бөліп төлеу",
 
-    "cats.eyebrow": "Біздің", "cats.title": "Өнімдер каталогы", "cats.count": "{n} тауар",
+    "cats.eyebrow": "Біздің", "cats.title": "Өнімдер каталогы", "cats.count1": "{n} тауар", "cats.count2": "{n} тауар", "cats.count5": "{n} тауар",
     "cats.all": "Барлық тауар",
 
     "catalog.title": "Тауарлар",
