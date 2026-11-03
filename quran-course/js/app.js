@@ -67,7 +67,7 @@
         ${COURSES.map((c, i) => {
           const p = Store.progress(c);
           return `<li class="enter" style="--d:${i + 2}">
-            <a class="course-card" href="#/course/${c.id}">
+            <a class="course-card" href="#course-${c.id}">
               <div class="course-art">${illustration(c, 'sm')}</div>
               <div class="course-text">
                 <h3>${c.title}</h3>
@@ -86,7 +86,7 @@
     if (!c) return notFound();
     const nextIdx = c.lessons.findIndex(l => !Store.isDone(c.id, l.id));
     return `
-      ${back('#/', 'Басты бет')}
+      ${back('#home', 'Басты бет')}
       <section class="course-header enter" style="--d:0">
         <div class="course-header-art">${illustration(c, 'lg')}</div>
         <div class="course-header-text">
@@ -100,7 +100,7 @@
         ${c.lessons.map((l, i) => {
           const done = Store.isDone(c.id, l.id);
           return `<li class="enter" style="--d:${Math.min(i + 2, 8)}">
-            <a class="lesson-card ${done ? 'done' : ''} ${i === nextIdx ? 'next' : ''}" href="#/lesson/${c.id}/${l.id}">
+            <a class="lesson-card ${done ? 'done' : ''} ${i === nextIdx ? 'next' : ''}" href="#lesson-${c.id}-${l.id}">
               <span class="num">${done ? check : i + 1}</span>
               <span class="lesson-text">
                 <b>${esc(l.title)}</b>
@@ -133,7 +133,7 @@
     const idx = c.lessons.indexOf(l);
     const done = Store.isDone(cid, lid);
     return `
-      ${back('#/course/' + cid, c.title)}
+      ${back('#course-' + cid, c.title)}
       <article class="lesson enter" style="--d:0">
         <p class="eyebrow">${idx + 1}-сабақ · ${l.duration}</p>
         <h1>${esc(l.title)}</h1>
@@ -189,7 +189,7 @@
       updateChrome();
       const names = newly.map(id => (ACHIEVEMENTS.find(a => a.id === id) || {}).title).filter(Boolean);
       toast(names.length ? `<b>Жаңа жетістік!</b> ${names.map(esc).join(', ')}` : '<b>Жарайсыз!</b> Сабақ аяқталды');
-      go('#/course/' + cid);
+      go('#course-' + cid);
     });
   }
 
@@ -200,7 +200,7 @@
     return `
       <section class="profile-head enter" style="--d:0">
         <div class="avatar" aria-hidden="true">${esc(name.trim().charAt(0).toUpperCase())}</div>
-        <div><h1>${esc(name)}</h1><a href="#/settings" class="link">Атыңызды өзгерту</a></div>
+        <div><h1>${esc(name)}</h1><a href="#prefs" class="link">Атыңызды өзгерту</a></div>
       </section>
       <div class="stats enter" style="--d:1">
         <div><b>${Store.totalDone()}</b><span>сабақ</span></div>
@@ -209,7 +209,7 @@
       </div>
       <h2 class="section-title enter" style="--d:2">Курс прогресі</h2>
       <div class="panel enter" style="--d:3">
-        ${COURSES.map(c => `<a class="prog-row" href="#/course/${c.id}">
+        ${COURSES.map(c => `<a class="prog-row" href="#course-${c.id}">
           <div class="prog-art">${illustration(c, 'sm')}</div>
           <div class="prog-body"><b>${c.title}</b>${progressBar(c)}</div></a>`).join('')}
       </div>
@@ -227,7 +227,7 @@
   function settings() {
     const st = Store.state.settings;
     return `
-      ${back('#/', 'Басты бет')}
+      ${back('#home', 'Басты бет')}
       <h1 class="page-title enter" style="--d:0">Баптаулар</h1>
       <form class="panel settings enter" style="--d:1" id="settingsForm">
         <label class="field"><span>Атыңыз</span>
@@ -259,30 +259,37 @@
       applySettings();
       toast('<b>Сақталды</b>');
     });
-    document.getElementById('resetBtn').addEventListener('click', () => {
-      if (confirm('Барлық прогрессті өшіруге сенімдісіз бе?')) {
+    document.getElementById('resetBtn').addEventListener('click', e => {
+      const btn = e.currentTarget;
+      if (!btn.dataset.armed) {
+        btn.dataset.armed = '1'; btn.textContent = 'Иә, өшіру';
+        setTimeout(() => { delete btn.dataset.armed; btn.textContent = 'Тазалау'; }, 4000);
+        return;
+      }
+      {
         Store.reset(); applySettings(); updateChrome();
         Object.keys(shownPct).forEach(k => delete shownPct[k]);
-        toast('Прогресс тазаланды'); go('#/');
+        toast('Прогресс тазаланды'); go('#home');
       }
     });
   }
 
   function notFound() {
-    return `<div class="panel empty"><h1>Бет табылмады</h1><p><a class="link" href="#/">Басты бетке оралу</a></p></div>`;
+    return `<div class="panel empty"><h1>Бет табылмады</h1><p><a class="link" href="#home">Басты бетке оралу</a></p></div>`;
   }
 
   /* ---------- router ---------- */
   function go(hash) { if (location.hash === hash) render(); else location.hash = hash; }
 
   function route() {
-    const parts = (location.hash.replace(/^#\/?/, '') || '').split('/').filter(Boolean);
+    const h = location.hash.replace(/^#/, '');
+    const parts = h.split('-');
     switch (parts[0]) {
-      case undefined: return { html: home(), nav: 'home' };
+      case '': case 'home': return { html: home(), nav: 'home' };
       case 'course': return { html: course(parts[1]), nav: 'home' };
       case 'lesson': return { html: lesson(parts[1], parts[2]), nav: 'home', bind: () => bindLesson(parts[1], parts[2]) };
       case 'profile': return { html: profile(), nav: 'profile' };
-      case 'settings': return { html: settings(), nav: 'settings', bind: bindSettings };
+      case 'prefs': return { html: settings(), nav: 'settings', bind: bindSettings };
       default: return { html: notFound(), nav: '' };
     }
   }
