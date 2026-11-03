@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Мөлдір Beauty Studio</title>
+<meta name="description" content="Мөлдір Beauty Studio — маникюр, қас пен кірпік, шаш және бет күтімі. Онлайн жазылу.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: split hero with a lacquer "shade card", then a price list read like a salon menu, booking card that builds a WhatsApp message. */
+:root{
+  --bg:#f6f2f5;
+  --surface:#fffdfe;
+  --ink:#251a2b;
+  --muted:#6c5f70;
+  --line:#e4d9e2;
+  --accent:#b8395f;      /* rose lacquer */
+  --accent-ink:#ffffff;
+  --sage:#5f8273;
+  --chip:#f1e6ee;
+  --display:"Cormorant Garamond","Cormorant",Georgia,"Times New Roman",serif;
+  --body:"Onest","Segoe UI",system-ui,-apple-system,sans-serif;
+  --r:14px;
+  --wrap:1120px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151017;--surface:#1f1822;--ink:#f3eaf1;--muted:#b4a6b6;--line:#3a2f3e;
+  --accent:#e57a9b;--accent-ink:#1b1014;--sage:#8fb3a3;--chip:#2b2230;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#151017;--surface:#1f1822;--ink:#f3eaf1;--muted:#b4a6b6;--line:#3a2f3e;
+  --accent:#e57a9b;--accent-ink:#1b1014;--sage:#8fb3a3;--chip:#2b2230;color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:var(--wrap);margin:0 auto}
+a{color:inherit}
+h1,h2,h3,.facts b{font-variant-numeric:lining-nums}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:clamp(2rem,4.5vw,3rem)}
+p{margin:0}
+.eyebrow{font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:20px;padding-block:14px}
+.logo{font-family:var(--display);font-size:1.6rem;font-weight:600;text-decoration:none;white-space:nowrap}
+.logo i{color:var(--accent);font-style:italic}
+.nav nav{display:flex;gap:22px;margin-left:auto}
+.nav nav a{text-decoration:none;color:var(--muted);font-size:.95rem}
+.nav nav a:hover{color:var(--ink)}
+.lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.lang button{border:0;background:none;color:var(--muted);font:500 .8rem var(--body);padding:6px 11px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+@media (max-width:760px){.nav nav{display:none}.lang{margin-left:auto}}
+
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:14px 24px;
+  font:600 1rem var(--body);cursor:pointer;text-decoration:none;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding-block:64px 72px}
+.hero h1{font-size:clamp(2.8rem,7vw,5.4rem)}
+.hero h1 em{color:var(--accent);font-style:italic;font-weight:500}
+.hero .lead{max-width:34rem;color:var(--muted);font-size:1.1rem;margin-top:20px}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.facts{display:flex;flex-wrap:wrap;gap:28px;margin-top:40px}
+.facts div{display:grid}
+.facts b{font-family:var(--display);font-size:2rem;font-weight:600;line-height:1}
+.facts span{color:var(--muted);font-size:.85rem}
+
+.shade-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:26px;
+  box-shadow:0 24px 60px -30px color-mix(in srgb,var(--accent) 45%,transparent)}
+.shade-card header{all:unset;display:flex;justify-content:space-between;align-items:baseline}
+.shade-card h3{font-size:1.5rem}
+.shades{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.shade{display:grid;justify-items:center;gap:6px;font-size:.72rem;color:var(--muted);text-align:center;cursor:default}
+.dot{width:100%;max-width:64px;aspect-ratio:1;border-radius:50%;background:var(--c);
+  box-shadow:inset -6px -8px 14px rgba(0,0,0,.18),inset 6px 6px 12px rgba(255,255,255,.35);transition:transform .25s}
+.shade:hover .dot{transform:scale(1.08) rotate(-8deg)}
+.shade-card .note{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);font-size:.9rem;color:var(--muted)}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding-block:40px 56px}}
+
+section{padding-block:72px;border-top:1px solid var(--line)}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px;margin-bottom:36px}
+.sec-head p{color:var(--muted);max-width:32rem}
+
+/* services */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.tab{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 16px;
+  font:500 .92rem var(--body);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.menu{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.menu li{display:grid;grid-template-columns:1fr auto auto;gap:8px 24px;align-items:baseline;padding:18px 22px;border-top:1px solid var(--line)}
+.menu li:first-child{border-top:0}
+.menu .name{font-weight:500;min-width:0}
+.menu .desc{grid-column:1/-1;color:var(--muted);font-size:.9rem;margin-top:-4px}
+.menu .time{color:var(--muted);font-size:.88rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.menu .price{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media (max-width:520px){.menu li{grid-template-columns:1fr auto}.menu .time{grid-column:1;grid-row:3}.menu .desc{grid-row:2}}
+
+/* why */
+.why{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.why div{display:grid;gap:8px;align-content:start}
+.why b{font-family:var(--display);font-size:1.45rem;font-weight:600;line-height:1.15}
+.why p{color:var(--muted);font-size:.95rem}
+.why .mark{width:36px;height:2px;background:var(--accent)}
+@media (max-width:900px){.why{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.why{grid-template-columns:1fr}}
+
+/* masters */
+.masters{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.master{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:grid;gap:14px;align-content:start}
+.avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:1.6rem;
+  font-weight:600;color:var(--accent-ink);background:var(--c)}
+.master h3{font-size:1.5rem}
+.master .role{color:var(--muted);font-size:.92rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags span{background:var(--chip);border-radius:999px;padding:3px 10px;font-size:.78rem}
+@media (max-width:860px){.masters{grid-template-columns:1fr}}
+
+/* booking */
+.book{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:start}
+.book .intro{display:grid;gap:16px}
+.book .intro p{color:var(--muted)}
+.steps{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:12px;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center}
+.steps li::before{content:counter(s);width:32px;height:32px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:.85rem;color:var(--muted)}
+form{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:28px;display:grid;gap:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.book{grid-template-columns:1fr}}
+@media (max-width:480px){.row{grid-template-columns:1fr}}
+label{display:grid;gap:6px;font-size:.85rem;font-weight:500;min-width:0}
+input,select,textarea{width:100%;font:400 1rem var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px}
+textarea{resize:vertical;min-height:80px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:0;border-color:transparent}
+.err{color:var(--accent);font-size:.85rem;min-height:1.2em}
+.result{border:1px dashed var(--sage);border-radius:12px;padding:16px;display:grid;gap:12px}
+.result pre{margin:0;white-space:pre-wrap;font:inherit;font-size:.92rem}
+.result .acts{display:flex;flex-wrap:wrap;gap:10px}
+.result .acts .btn{padding:10px 18px;font-size:.92rem}
+.ok{color:var(--sage);font-weight:600;font-size:.9rem}
+
+/* contacts */
+.contacts{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.contacts div{display:grid;gap:6px;align-content:start}
+.contacts .v{font-size:1.1rem;font-weight:500;user-select:all}
+.contacts .s{color:var(--muted);font-size:.9rem}
+@media (max-width:760px){.contacts{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);padding-block:28px 40px;color:var(--muted);font-size:.85rem;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#top">Мөлдір <i>beauty</i></a>
+    <nav aria-label="Бөлімдер">
+      <a href="#services" data-i="nav_services">Қызметтер</a>
+      <a href="#masters" data-i="nav_masters">Шеберлер</a>
+      <a href="#book" data-i="nav_book">Жазылу</a>
+      <a href="#contacts" data-i="nav_contacts">Байланыс</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Тіл">
+      <button type="button" id="lang-kz" aria-pressed="true">ҚАЗ</button>
+      <button type="button" id="lang-ru" aria-pressed="false">РУС</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <div>
+      <p class="eyebrow" data-i="hero_eyebrow">Астана · Сарайшық к-сі</p>
+      <h1 style="margin-top:14px" data-i-html="hero_title">Күтімді өзіңізге <em>сыйлаңыз</em></h1>
+      <p class="lead" data-i="hero_lead">Маникюр, қас пен кірпік, шаш және бет күтімі бір студияда. Құралдар 3 кезеңде залалсыздандырылады, ал шеберлер кемінде 4 жыл тәжірибесі барлар.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="#book" data-i="cta_book">Онлайн жазылу</a>
+        <a class="btn btn-ghost" href="#services" data-i="cta_prices">Бағаларды көру</a>
+      </div>
+      <div class="facts">
+        <div><b>4+</b><span data-i="fact_exp">жыл тәжірибе</span></div>
+        <div><b>3</b><span data-i="fact_steril">кезеңді стерилизация</span></div>
+        <div><b>09–21</b><span data-i="fact_hours">күн сайын</span></div>
+      </div>
+    </div>
+
+    <aside class="shade-card" aria-labelledby="shade-title">
+      <header>
+        <h3 id="shade-title" data-i="shade_title">Маусым түстері</h3>
+        <span class="eyebrow">Gel · 2026</span>
+      </header>
+      <div class="shades">
+        <div class="shade" title="#1 Rose Lacquer"><span class="dot" style="--c:#b8395f"></span>#01</div>
+        <div class="shade" title="#2 Milk Pink"><span class="dot" style="--c:#efc9cf"></span>#02</div>
+        <div class="shade" title="#3 Plum"><span class="dot" style="--c:#5b2a4d"></span>#03</div>
+        <div class="shade" title="#4 Nude"><span class="dot" style="--c:#d9b39a"></span>#04</div>
+        <div class="shade" title="#5 Sage"><span class="dot" style="--c:#8fae9c"></span>#05</div>
+        <div class="shade" title="#6 Cherry"><span class="dot" style="--c:#7d1426"></span>#06</div>
+        <div class="shade" title="#7 Lilac"><span class="dot" style="--c:#b9a3d2"></span>#07</div>
+        <div class="shade" title="#8 Pearl"><span class="dot" style="--c:#f3ece4"></span>#08</div>
+      </div>
+      <p class="note" data-i="shade_note">Палитрада 200-ден астам гель-лак түсі бар. Шебер түсті қолыңыздың реңкіне қарай таңдауға көмектеседі.</p>
+    </aside>
+  </div>
+
+  <section id="services" aria-labelledby="services-h">
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow" data-i="price_eyebrow">Прайс</p>
+        <h2 id="services-h" style="margin-top:8px" data-i="price_title">Қызметтер мен бағалар</h2>
+      </div>
+      <p data-i="price_note">Бағалар теңгемен берілген. Нақты құны шебердің деңгейіне және жұмыстың көлеміне байланысты.</p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <ul class="menu" id="menu" role="tabpanel"></ul>
+  </section>
+
+  <section aria-labelledby="why-h">
+    <div class="sec-head">
+      <h2 id="why-h" data-i="why_title">Неге бізді таңдайды</h2>
+    </div>
+    <div class="why">
+      <div><span class="mark"></span><b data-i="w1_t">Қауіпсіз құралдар</b><p data-i="w1_p">Құралдар жуылып, дезинфекцияланып, құрғақ ыстық шкафта стерилизацияланады. Пакет сіздің көзіңізше ашылады.</p></div>
+      <div><span class="mark"></span><b data-i="w2_t">Ұзаққа шыдайды</b><p data-i="w2_p">Маникюрге 7 күн кепілдік береміз: жабын сынса, тегін түзетеміз.</p></div>
+      <div><span class="mark"></span><b data-i="w3_t">Уақытыңызды бағалаймыз</b><p data-i="w3_p">Жазылған уақытта қабылдаймыз. Қызметті кешіктірсек, келесі келгеніңізде 10% жеңілдік бар.</p></div>
+      <div><span class="mark"></span><b data-i="w4_t">Сапалы материалдар</b><p data-i="w4_p">Сертификатталған гель-лактар мен гипоаллергенді бояулар қолданамыз.</p></div>
+    </div>
+  </section>
+
+  <section id="masters" aria-labelledby="masters-h">
+    <div class="sec-head">
+      <h2 id="masters-h" data-i="masters_title">Шеберлер</h2>
+      <p data-i="masters_note">Шеберді жазылу кезінде таңдай аласыз немесе әкімшіге қалдыра аласыз.</p>
+    </div>
+    <div class="masters">
+      <article class="master">
+        <div class="avatar" style="--c:var(--accent)">А</div>
+        <div><h3 data-i="m1_n">Айгерім</h3><p class="role" data-i="m1_r">Маникюр мен педикюр шебері · 6 жыл</p></div>
+        <div class="tags"><span data-i="t_nails">Тырнақ</span><span data-i="t_design">Дизайн</span><span data-i="t_ext">Ұзарту</span></div>
+      </article>
+      <article class="master">
+        <div class="avatar" style="--c:var(--sage)">Д</div>
+        <div><h3 data-i="m2_n">Дана</h3><p class="role" data-i="m2_r">Бровист пен лэшмейкер · 5 жыл</p></div>
+        <div class="tags"><span data-i="t_brows">Қас</span><span data-i="t_lash">Кірпік</span><span data-i="t_lami">Ламинация</span></div>
+      </article>
+      <article class="master">
+        <div class="avatar" style="--c:var(--ink)">М</div>
+        <div><h3 data-i="m3_n">Мадина</h3><p class="role" data-i="m3_r">Стилист пен колорист · 8 жыл</p></div>
+        <div class="tags"><span data-i="t_hair">Шаш</span><span data-i="t_color">Бояу</span><span data-i="t_style">Сәндеу</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section id="book" aria-labelledby="book-h">
+    <div class="book">
+      <div class="intro">
+        <p class="eyebrow" data-i="book_eyebrow">Жазылу</p>
+        <h2 id="book-h" data-i="book_title">Ыңғайлы уақытты таңдаңыз</h2>
+        <p data-i="book_lead">Форманы толтырыңыз. Біз WhatsApp-қа дайын хабарлама жасап береміз, әкімші 15 минут ішінде уақытты растайды.</p>
+        <ol class="steps">
+          <li data-i="s1">Қызмет пен күнді таңдаңыз</li>
+          <li data-i="s2">WhatsApp-та хабарламаны жіберіңіз</li>
+          <li data-i="s3">Әкімшіден растауды күтіңіз</li>
+        </ol>
+      </div>
+
+      <form id="form" novalidate>
+        <div class="row">
+          <label for="f-name"><span data-i="f_name">Атыңыз</span>
+            <input id="f-name" autocomplete="given-name" value="Әсем" required></label>
+          <label for="f-phone"><span data-i="f_phone">Телефон</span>
+            <input id="f-phone" type="tel" autocomplete="tel" inputmode="tel" value="+7 701 123 45 67" required></label>
+        </div>
+        <label for="f-service"><span data-i="f_service">Қызмет</span>
+          <select id="f-service"></select></label>
+        <div class="row">
+          <label for="f-date"><span data-i="f_date">Күні</span>
+            <input id="f-date" type="date" required></label>
+          <label for="f-time"><span data-i="f_time">Уақыты</span>
+            <select id="f-time"></select></label>
+        </div>
+        <label for="f-master"><span data-i="f_master">Шебер</span>
+          <select id="f-master">
+            <option value="any" data-i="any_master">Кез келген шебер</option>
+            <option value="Айгерім" data-i="m1_n">Айгерім</option>
+            <option value="Дана" data-i="m2_n">Дана</option>
+            <option value="Мадина" data-i="m3_n">Мадина</option>
+          </select></label>
+        <label for="f-note"><span data-i="f_note">Тілек (міндетті емес)</span>
+          <textarea id="f-note" data-i-ph="f_note_ph" placeholder="Мысалы: french дизайн керек"></textarea></label>
+        <p class="err" id="err" role="alert"></p>
+        <button class="btn btn-primary" type="submit" data-i="f_submit">Хабарлама дайындау</button>
+        <div class="result" id="result" hidden>
+          <pre id="msg"></pre>
+          <div class="acts">
+            <a class="btn btn-primary" id="wa" href="#" target="_blank" rel="noopener" data-i="f_wa">WhatsApp-та жіберу</a>
+            <button class="btn btn-ghost" type="button" id="copy" data-i="f_copy">Мәтінді көшіру</button>
+          </div>
+          <p class="ok" id="ok" hidden></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section id="contacts" aria-labelledby="contacts-h">
+    <div class="sec-head"><h2 id="contacts-h" data-i="contacts_title">Байланыс</h2></div>
+    <div class="contacts">
+      <div><p class="eyebrow" data-i="c_addr">Мекенжай</p><p class="v" data-i="c_addr_v">Астана, Сарайшық к-сі, 5</p><p class="s" data-i="c_addr_s">1-қабат, жеке кіреберіс</p></div>
+      <div><p class="eyebrow" data-i="c_phone">Телефон / WhatsApp</p><p class="v">+7 700 000 00 00</p><p class="s" data-i="c_phone_s">Әкімші 09:00–21:00 аралығында жауап береді</p></div>
+      <div><p class="eyebrow" data-i="c_hours">Жұмыс уақыты</p><p class="v" data-i="c_hours_v">Күн сайын 09:00–21:00</p><p class="s">Instagram: @moldir.beauty</p></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>© 2026 Мөлдір Beauty Studio</span>
+  <span data-i="foot">Бағалар жария оферта болып табылмайды</span>
+</footer>
+
+<script>
+(() => {
+  const WA_NUMBER = "77000000000"; // салонның WhatsApp нөмірі, + белгісіз
+
+  const SERVICES = {
+    nails: { kz:"Тырнақ", ru:"Ногти", items:[
+      ["Маникюр + гель-лак","Маникюр + гель-лак","Аппараттық маникюр, бір түсті жабын","Аппаратный маникюр, однотонное покрытие",90,"8 000"],
+      ["Жабынсыз маникюр","Маникюр без покрытия","Кутикула, пішін, күтім майы","Кутикула, форма, масло для ухода",45,"4 000"],
+      ["Тырнақ ұзарту","Наращивание ногтей","Гельмен, ұзындығы M дейін","Гелем, длина до M",150,"14 000"],
+      ["Педикюр + гель-лак","Педикюр + гель-лак","Толық педикюр, жабынмен","Полный педикюр с покрытием",100,"11 000"],
+      ["Дизайн (1 саусақ)","Дизайн (1 ноготь)","Сурет, стразы, фольга","Роспись, стразы, фольга",10,"500"]]},
+    brows: { kz:"Қас пен кірпік", ru:"Брови и ресницы", items:[
+      ["Қас түзету + бояу","Коррекция + окрашивание бровей","Хна немесе бояу","Хна или краска",45,"6 000"],
+      ["Қас ламинациясы","Ламинирование бровей","Бояу мен күтімді қоса","С окрашиванием и уходом",60,"9 000"],
+      ["Кірпік ламинациясы","Ламинирование ресниц","Ботокс күтімімен","С ботокс-уходом",75,"10 000"],
+      ["Кірпік ұзарту (классика)","Наращивание ресниц (классика)","1:1 техникасы","Техника 1:1",120,"12 000"]]},
+    hair: { kz:"Шаш", ru:"Волосы", items:[
+      ["Әйелдер шаш қиюы","Женская стрижка","Жуу мен сәндеуді қоса","С мытьём и укладкой",60,"7 000"],
+      ["Бір түсті бояу","Окрашивание в один тон","Орташа ұзындық","Средняя длина",150,"от 18 000"],
+      ["AirTouch / балаяж","AirTouch / балаяж","Кеңес беру мен тонирлеуді қоса","С консультацией и тонированием",300,"от 45 000"],
+      ["Кешкі сәндеу","Вечерняя укладка","Бұйра немесе шаш жинау","Локоны или собранная причёска",60,"8 000"]]},
+    face: { kz:"Бет күтімі", ru:"Уход за лицом", items:[
+      ["Бетті тазалау (комби)","Чистка лица (комби)","Механикалық және ультрадыбыстық","Механическая + ультразвуковая",90,"15 000"],
+      ["Алгинат маска","Альгинатная маска","Ылғалдандыру курсы","Курс увлажнения",30,"5 000"],
+      ["Күндізгі макияж","Дневной макияж","Кеңесімен бірге","С консультацией",60,"10 000"]]}
+  };
+
+  const RU = {
+    nav_services:"Услуги",nav_masters:"Мастера",nav_book:"Запись",nav_contacts:"Контакты",
+    hero_eyebrow:"Астана · ул. Сарайшык",hero_title:"Подарите себе <em>заботу</em>",
+    hero_lead:"Маникюр, брови и ресницы, волосы и уход за лицом в одной студии. Инструменты проходят стерилизацию в 3 этапа, у мастеров опыт от 4 лет.",
+    cta_book:"Записаться онлайн",cta_prices:"Смотреть цены",fact_exp:"лет опыта",fact_steril:"этапа стерилизации",fact_hours:"ежедневно",
+    shade_title:"Цвета сезона",shade_note:"В палитре больше 200 оттенков гель-лака. Мастер поможет подобрать цвет под тон кожи.",
+    price_eyebrow:"Прайс",price_title:"Услуги и цены",price_note:"Цены указаны в тенге. Итоговая стоимость зависит от уровня мастера и объёма работы.",
+    why_title:"Почему выбирают нас",
+    w1_t:"Безопасные инструменты",w1_p:"Инструменты моют, дезинфицируют и стерилизуют в сухожаровом шкафу. Крафт-пакет вскрывается при вас.",
+    w2_t:"Носится долго",w2_p:"Гарантия на маникюр 7 дней: если покрытие сколется, исправим бесплатно.",
+    w3_t:"Ценим ваше время",w3_p:"Принимаем точно по записи. Если задержим начало, дадим скидку 10% на следующий визит.",
+    w4_t:"Качественные материалы",w4_p:"Работаем с сертифицированными гель-лаками и гипоаллергенными красителями.",
+    masters_title:"Мастера",masters_note:"Мастера можно выбрать при записи или доверить выбор администратору.",
+    m1_n:"Айгерим",m1_r:"Мастер маникюра и педикюра · 6 лет",m2_n:"Дана",m2_r:"Бровист и лэшмейкер · 5 лет",m3_n:"Мадина",m3_r:"Стилист-колорист · 8 лет",
+    t_nails:"Ногти",t_design:"Дизайн",t_ext:"Наращивание",t_brows:"Брови",t_lash:"Ресницы",t_lami:"Ламинирование",t_hair:"Волосы",t_color:"Окрашивание",t_style:"Укладка",
+    book_eyebrow:"Запись",book_title:"Выберите удобное время",book_lead:"Заполните форму. Мы подготовим сообщение для WhatsApp, администратор подтвердит время в течение 15 минут.",
+    s1:"Выберите услугу и дату",s2:"Отправьте сообщение в WhatsApp",s3:"Дождитесь подтверждения администратора",
+    f_name:"Ваше имя",f_phone:"Телефон",f_service:"Услуга",f_date:"Дата",f_time:"Время",f_master:"Мастер",any_master:"Любой мастер",
+    f_note:"Пожелания (необязательно)",f_note_ph:"Например: нужен french",f_submit:"Подготовить сообщение",f_wa:"Отправить в WhatsApp",f_copy:"Скопировать текст",
+    contacts_title:"Контакты",c_addr:"Адрес",c_addr_v:"Астана, ул. Сарайшык, 5",c_addr_s:"1 этаж, отдельный вход",c_phone:"Телефон / WhatsApp",
+    c_phone_s:"Администратор отвечает с 09:00 до 21:00",c_hours:"Часы работы",c_hours_v:"Ежедневно 09:00–21:00",foot:"Цены не являются публичной офертой"
+  };
+  const T = {
+    kz:{min:"мин",err_name:"Атыңызды жазыңыз.",err_phone:"Телефон нөмірін толық жазыңыз.",err_date:"Бүгіннен бастап күн таңдаңыз.",
+        copied:"Мәтін көшірілді. Оны WhatsApp-қа қоюға болады.",copy_fail:"Көшіру мүмкін болмады. Мәтінді белгілеп, өзіңіз көшіріңіз.",
+        msg:(d)=>`Сәлеметсіз бе! Жазылғым келеді.\nАты: ${d.name}\nТелефон: ${d.phone}\nҚызмет: ${d.service}\nКүні: ${d.date}, ${d.time}\nШебер: ${d.master}${d.note?`\nТілек: ${d.note}`:""}`},
+    ru:{min:"мин",err_name:"Укажите имя.",err_phone:"Укажите номер телефона полностью.",err_date:"Выберите дату не раньше сегодняшней.",
+        copied:"Текст скопирован. Его можно вставить в WhatsApp.",copy_fail:"Не удалось скопировать. Выделите текст и скопируйте вручную.",
+        msg:(d)=>`Здравствуйте! Хочу записаться.\nИмя: ${d.name}\nТелефон: ${d.phone}\nУслуга: ${d.service}\nДата: ${d.date}, ${d.time}\nМастер: ${d.master}${d.note?`\nПожелания: ${d.note}`:""}`}
+  };
+
+  const $ = (s) => document.querySelector(s);
+  let lang = "kz", cat = "nails";
+  const KZ = {};
+  document.querySelectorAll("[data-i]").forEach(el => { if (!(el.dataset.i in KZ)) KZ[el.dataset.i] = el.textContent; });
+  document.querySelectorAll("[data-i-html]").forEach(el => KZ[el.dataset.iHtml] = el.innerHTML);
+  document.querySelectorAll("[data-i-ph]").forEach(el => KZ[el.dataset.iPh] = el.placeholder);
+
+  const fmtDur = (m) => m >= 60 ? `${Math.floor(m/60)} сағ${m%60?` ${m%60} ${T[lang].min}`:""}`.replace("сағ", lang==="ru"?"ч":"сағ") : `${m} ${T[lang].min}`;
+  const priceText = (p) => lang==="ru" ? `${p} ₸` : `${p.replace("от ","")} ₸${p.startsWith("от ")?" бастап":""}`;
+
+  function renderTabs(){
+    const tabs = $("#tabs"); tabs.innerHTML = "";
+    Object.entries(SERVICES).forEach(([k,v]) => {
+      const b = document.createElement("button");
+      b.type="button"; b.className="tab"; b.role="tab"; b.id="tab-"+k;
+      b.setAttribute("aria-selected", k===cat); b.textContent = v[lang];
+      b.onclick = () => { cat = k; renderTabs(); renderMenu(); };
+      tabs.append(b);
+    });
+  }
+  function renderMenu(){
+    const ul = $("#menu"); ul.innerHTML = "";
+    ul.setAttribute("aria-labelledby","tab-"+cat);
+    SERVICES[cat].items.forEach(it => {
+      const i = lang==="ru"?1:0;
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="name"></span><span class="time"></span><span class="price"></span><span class="desc"></span>`;
+      li.children[0].textContent = it[i]; li.children[1].textContent = fmtDur(it[4]);
+      li.children[2].textContent = priceText(it[5]); li.children[3].textContent = it[2+i];
+      ul.append(li);
+    });
+  }
+  function renderServiceSelect(){
+    const sel = $("#f-service"), keep = sel.selectedIndex;
+    sel.innerHTML = "";
+    Object.values(SERVICES).forEach(v => {
+      const g = document.createElement("optgroup"); g.label = v[lang];
+      v.items.forEach(it => { const o = document.createElement("option"); o.textContent = `${it[lang==="ru"?1:0]} · ${priceText(it[5])}`; o.value = it[lang==="ru"?1:0]; g.append(o); });
+      sel.append(g);
+    });
+    if (keep >= 0) sel.selectedIndex = keep;
+  }
+  function setLang(l){
+    lang = l;
+    document.documentElement.lang = l === "ru" ? "ru" : "kk";
+    $("#lang-kz").setAttribute("aria-pressed", l==="kz"); $("#lang-ru").setAttribute("aria-pressed", l==="ru");
+    document.querySelectorAll("[data-i]").forEach(el => { const v = l==="ru"?RU[el.dataset.i]:KZ[el.dataset.i]; if (v) el.textContent = v; });
+    document.querySelectorAll("[data-i-html]").forEach(el => el.innerHTML = l==="ru"?RU[el.dataset.iHtml]:KZ[el.dataset.iHtml]);
+    document.querySelectorAll("[data-i-ph]").forEach(el => el.placeholder = l==="ru"?RU[el.dataset.iPh]:KZ[el.dataset.iPh]);
+    renderTabs(); renderMenu(); renderServiceSelect();
+    $("#result").hidden = true; $("#err").textContent = "";
+    try { localStorage.setItem("lang", l); } catch(e) {}
+  }
+  $("#lang-kz").onclick = () => setLang("kz");
+  $("#lang-ru").onclick = () => setLang("ru");
+
+  // time slots and default date (tomorrow)
+  const ts = $("#f-time");
+  for (let h = 9; h <= 20; h++) for (const m of ["00","30"]) { if (h===20 && m==="30") continue; const o = document.createElement("option"); o.textContent = `${String(h).padStart(2,"0")}:${m}`; ts.append(o); }
+  ts.value = "11:00";
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const today = new Date(), tmr = new Date(); tmr.setDate(today.getDate()+1);
+  $("#f-date").min = iso(today); $("#f-date").value = iso(tmr);
+
+  $("#form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const t = T[lang], err = $("#err");
+    const name = $("#f-name").value.trim(), phone = $("#f-phone").value.trim(), date = $("#f-date").value;
+    if (!name) { err.textContent = t.err_name; $("#f-name").focus(); return; }
+    if (phone.replace(/\D/g,"").length < 10) { err.textContent = t.err_phone; $("#f-phone").focus(); return; }
+    if (!date || date < iso(today)) { err.textContent = t.err_date; $("#f-date").focus(); return; }
+    err.textContent = "";
+    const [y,mo,d] = date.split("-");
+    const ms = $("#f-master");
+    const text = t.msg({ name, phone, service: $("#f-service").value, date: `${d}.${mo}.${y}`, time: ts.value,
+      master: ms.options[ms.selectedIndex].textContent, note: $("#f-note").value.trim() });
+    $("#msg").textContent = text;
+    $("#wa").href = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
+    $("#ok").hidden = true; $("#result").hidden = false;
+  });
+  $("#copy").addEventListener("click", () => {
+    const ok = $("#ok"), t = T[lang];
+    navigator.clipboard.writeText($("#msg").textContent)
+      .then(() => { ok.textContent = t.copied; ok.hidden = false; })
+      .catch(() => { const r = document.createRange(); r.selectNodeContents($("#msg")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); ok.textContent = t.copy_fail; ok.hidden = false; });
+  });
+
+  let saved = null; try { saved = localStorage.getItem("lang"); } catch(e) {}
+  setLang(saved === "ru" ? "ru" : "kz");
+})();
+</script>
+</body>
+</html>
