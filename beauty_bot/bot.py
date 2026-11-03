@@ -26,7 +26,9 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.fsm.storage.base import BaseStorage, StorageKey
+from aiohttp import ClientSession
 from aiogram.types import (
     FSInputFile,
     CallbackQuery,
@@ -92,6 +94,7 @@ def init_db():
                 PRIMARY KEY (user_id, product_id)
             );
             CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
+            CREATE TABLE IF NOT EXISTS fsm (key TEXT PRIMARY KEY, state TEXT, data TEXT);
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER, username TEXT, name TEXT, phone TEXT,
@@ -101,6 +104,17 @@ def init_db():
             );
             """
         )
+
+
+def setting_get(key: str):
+    with db() as con:
+        row = con.execute("SELECT value FROM settings WHERE key=?", (key,)).fetchone()
+    return row["value"] if row else None
+
+
+def setting_del(key: str):
+    with db() as con:
+        con.execute("DELETE FROM settings WHERE key=?", (key,))
 
 
 def setting_set(key: str, value: str):
@@ -580,8 +594,6 @@ async def admin_orders(m: Message):
 
 # ── Админ: фото және WhatsApp ──
 
-PENDING_PHOTO: dict[int, str] = {}
-
 ADMIN_HELP = (
     "🛠 <b>Админ командалары</b>\n\n"
     "📸 <b>Тауарға фото қосу:</b> ботқа фотоны жай жіберіңіз → қай тауарға екенін батырмамен таңдаңыз.\n"
@@ -607,7 +619,7 @@ async def admin_help(m: Message):
 async def admin_photo(m: Message):
     if m.from_user.id not in ADMIN_IDS:
         return await m.answer("Төмендегі мәзірді қолданыңыз 👇", reply_markup=MAIN_KB)
-    PENDING_PHOTO[m.from_user.id] = m.photo[-1].file_id
+    setting_set(f"pending_photo:{m.from_user.id}", m.photo[-1].file_id)
     rows = [[(f"{'🖼 ' if p.get('photo') else ''}{p['name']}", f"setph:{p['id']}")] for p in CATALOG["products"]]
     rows.append([("❌ Болдырмау", "setph:-")])
     await m.answer("📸 Бұл фото қай тауарға?", reply_markup=ikb(rows))
@@ -618,7 +630,8 @@ async def cb_set_photo(cb: CallbackQuery):
     if cb.from_user.id not in ADMIN_IDS:
         return await cb.answer("Рұқсат жоқ", show_alert=True)
     pid = cb.data.split(":", 1)[1]
-    file_id = PENDING_PHOTO.pop(cb.from_user.id, None)
+    file_id = setting_get(f"pending_photo:{cb.from_user.id}")
+    setting_del(f"pending_photo:{cb.from_user.id}")
     if pid == "-" or pid not in PRODUCTS:
         await cb.message.edit_text("Болдырылмады.")
         return await cb.answer()
@@ -692,8 +705,60 @@ async def fallback(m: Message):
 
 # ───────────────────────── Іске қосу ─────────────────────────
 
+class SQLiteStorage(BaseStorage):
+    """Тапсырыс беру қадамдарын SQLite-та сақтайды — сервер қайта қосылса да жоғалмайды."""
+
+    @staticmethod
+    def _k(key: StorageKey) -> str:
+        return f"{key.bot_id}:{key.chat_id}:{key.user_id}:{key.thread_id}:{key.business_connection_id}:{key.destiny}"
+
+    async def set_state(self, key: StorageKey, state=None) -> None:
+        value = state.state if isinstance(state, State) else state
+        with db() as con:
+            con.execute("INSERT INTO fsm (key, state, data) VALUES (?, ?, '{}') "
+                        "ON CONFLICT(key) DO UPDATE SET state=excluded.state", (self._k(key), value))
+
+    async def get_state(self, key: StorageKey):
+        with db() as con:
+            row = con.execute("SELECT state FROM fsm WHERE key=?", (self._k(key),)).fetchone()
+        return row["state"] if row else None
+
+    async def set_data(self, key: StorageKey, data) -> None:
+        payload = json.dumps(dict(data), ensure_ascii=False)
+        with db() as con:
+            con.execute("INSERT INTO fsm (key, state, data) VALUES (?, NULL, ?) "
+                        "ON CONFLICT(key) DO UPDATE SET data=excluded.data", (self._k(key), payload))
+
+    async def get_data(self, key: StorageKey):
+        with db() as con:
+            row = con.execute("SELECT data FROM fsm WHERE key=?", (self._k(key),)).fetchone()
+        return json.loads(row["data"]) if row and row["data"] else {}
+
+    async def close(self) -> None:
+        pass
+
+
+class EnvProxySession(AiohttpSession):
+    """HTTPS_PROXY / https_proxy айнымалысын ескеретін сессия (PythonAnywhere тегін аккаунты үшін)."""
+
+    async def create_session(self) -> ClientSession:
+        if self._should_reset_connector:
+            await self.close()
+        if self._session is None or self._session.closed:
+            self._session = ClientSession(
+                connector=self._connector_type(**self._connector_init), trust_env=True
+            )
+            self._should_reset_connector = False
+        return self._session
+
+
+def make_bot() -> Bot:
+    return Bot(BOT_TOKEN, session=EnvProxySession(),
+               default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+
+
 def build_dispatcher() -> Dispatcher:
-    dp = Dispatcher(storage=MemoryStorage())
+    dp = Dispatcher(storage=SQLiteStorage())
     dp.include_router(router)
     return dp
 
@@ -706,7 +771,7 @@ async def main():
         log.warning("ADMIN_IDS бос — тапсырыстар ешкімге жіберілмейді. /myid арқылы id-іңізді біліңіз.")
     init_db()
     apply_settings()
-    bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = make_bot()
     await bot.delete_webhook(drop_pending_updates=False)
     await build_dispatcher().start_polling(bot)
 

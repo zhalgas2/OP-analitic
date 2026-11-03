@@ -69,3 +69,20 @@ cd ~/OP-analitic && git pull && bash beauty_bot/install_mac.sh "BOT_TOKEN" "ADMI
 - Жаңарту: `git pull`, содан кейін орнату командасын қайта іске қосыңыз.
 
 Mac ұйықтап қалса (қақпағы жабық), бот уақытша жауап бермейді.
+
+## Тегін серверде 24/7 (PythonAnywhere)
+
+Mac қажет емес, бот webhook арқылы тұрақты жұмыс істейді. Дерекқор (`shop.db`) серверде сақталады.
+
+1. https://www.pythonanywhere.com → **Pricing & signup** → **Create a Beginner account** (тегін).
+2. **Web** → **Add a new web app** → Next → **Manual configuration** → Python (ең жаңасы) → Next.
+3. **Consoles** → **Bash** → мына команданы жазыңыз:
+   ```bash
+   git clone -b beauty-bot https://github.com/zhalgas2/OP-analitic.git ; cd ~/OP-analitic && git pull && bash beauty_bot/pa_setup.sh "BOT_TOKEN" "ADMIN_ID"
+   ```
+4. **Web** → жасыл **Reload** батырмасы.
+5. Mac-та бот іске қосулы болса, тоқтатыңыз: `bash ~/OP-analitic/beauty_bot/install_mac.sh stop`
+   (әйтпесе Mac-тағы бот webhook-ты өшіріп тастайды).
+
+Жаңарту: Bash консолінде 3-қадамдағы команданы қайта іске қосыңыз.
+Тегін аккаунтта сайтты 3 айда бір рет **Web → «Run until 3 months from today»** батырмасымен ұзарту керек (сайт email арқылы еске салады).
