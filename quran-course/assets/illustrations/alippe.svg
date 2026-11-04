@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+<defs>
+  <linearGradient id="plTop" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFFEFA"/><stop offset=".55" stop-color="#F6EFE2"/><stop offset="1" stop-color="#E6D9C2"/>
+  </linearGradient>
+  <linearGradient id="plSide" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#D9C8AA"/><stop offset=".35" stop-color="#E9E0D1"/><stop offset=".7" stop-color="#DDCDB1"/><stop offset="1" stop-color="#C3AE8C"/>
+  </linearGradient>
+  <linearGradient id="archFace" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#3F7159"/><stop offset=".45" stop-color="#213E32"/><stop offset="1" stop-color="#16291F"/>
+  </linearGradient>
+  <linearGradient id="archSide" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#132a20"/><stop offset="1" stop-color="#0C1A14"/>
+  </linearGradient>
+  <linearGradient id="niche" x1=".5" y1="0" x2=".5" y2="1">
+    <stop offset="0" stop-color="#132a20"/><stop offset=".6" stop-color="#1F3D30"/><stop offset="1" stop-color="#2D5241"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#F6E6BF"/><stop offset=".45" stop-color="#C9A66B"/><stop offset="1" stop-color="#946F38"/>
+  </linearGradient>
+  <linearGradient id="goldV" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#F8E9C4"/><stop offset=".5" stop-color="#D8B77A"/><stop offset="1" stop-color="#A9844A"/>
+  </linearGradient>
+  <radialGradient id="warm" cx=".5" cy=".5" r=".5">
+    <stop offset="0" stop-color="#FFE9B8" stop-opacity=".85"/><stop offset=".5" stop-color="#E9C988" stop-opacity=".28"/><stop offset="1" stop-color="#E9C988" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="halo" cx=".5" cy=".55" r=".5">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".9"/><stop offset="1" stop-color="#FAF6EE" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="lattice" width="14" height="14" patternUnits="userSpaceOnUse">
+    <path d="M7 0 L14 7 L7 14 L0 7 Z" fill="none" stroke="#C9A66B" stroke-width=".6" opacity=".22"/>
+  </pattern>
+  <filter id="blur6" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <filter id="blur3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+  <filter id="drop" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="2" dy="4" stdDeviation="3" flood-color="#213E32" flood-opacity=".28"/>
+  </filter>
+  <filter id="dropS" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="1" dy="2" stdDeviation="1.6" flood-color="#213E32" flood-opacity=".3"/>
+  </filter>
+  
+  <linearGradient id="quill" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#E3D6BE"/><stop offset=".5" stop-color="#FFFDF7"/><stop offset="1" stop-color="#F2E8D6"/></linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B6852"/><stop offset=".5" stop-color="#213E32"/><stop offset="1" stop-color="#0E1D16"/></linearGradient>
+</defs>
+  <ellipse cx="120" cy="118" rx="112" ry="104" fill="url(#halo)"/>
+  <ellipse cx="122" cy="206" rx="98" ry="15" fill="#213E32" opacity=".22" filter="url(#blur6)"/>
+  <!-- platform -->
+  <path d="M28 184 V197 A92 22 0 0 0 212 197 V184 Z" fill="url(#plSide)"/>
+  <path d="M28 197 A92 22 0 0 0 212 197" fill="none" stroke="#B9A27E" stroke-width="1" opacity=".6"/>
+  <ellipse cx="120" cy="184" rx="92" ry="22" fill="url(#plTop)"/>
+  <ellipse cx="120" cy="184" rx="91" ry="21.3" fill="none" stroke="#FFFFFF" stroke-width="1.4" opacity=".8"/>
+  <ellipse cx="120" cy="184.5" rx="78" ry="16.5" fill="none" stroke="#C9A66B" stroke-width="1" opacity=".55"/>
+  <!-- arch: depth, face, trim, niche -->
+  <g filter="url(#drop)">
+    <path d="M69 181 V100 C69 64 99 44 127 26 C155 44 185 64 185 100 V181 Z" fill="url(#archSide)"/>
+    <path d="M62 180 V98 C62 62 92 42 120 24 C148 42 178 62 178 98 V180 Z" fill="url(#archFace)"/>
+  </g>
+  <path d="M63.5 178 V98 C63.5 63 92 44 120 26" fill="none" stroke="#FFFFFF" stroke-width="1.2" opacity=".22"/>
+  <path d="M68 180 V99 C68 66 95 48 120 31 C145 48 172 66 172 99 V180" fill="none" stroke="url(#gold)" stroke-width="1.6" opacity=".9"/>
+  <path d="M80 180 V104 C80 76 101 61 120 48 C139 61 160 76 160 104 V180 Z" fill="url(#niche)"/>
+  <path d="M80 180 V104 C80 76 101 61 120 48 C139 61 160 76 160 104 V180 Z" fill="url(#lattice)"/>
+  <path d="M80 180 V104 C80 76 101 61 120 48" fill="none" stroke="#0A1510" stroke-width="3" opacity=".35"/>
+  <g opacity="1"><path d="M116.4 35.9 H123.6 V43.1 H116.4 Z" fill="url(#gold)"/><path d="M116.4 35.9 H123.6 V43.1 H116.4 Z" fill="url(#gold)" transform="rotate(45 120 39.5)"/><circle cx="120" cy="39.5" r="1.6" fill="#213E32" opacity=".55"/></g>
+  <rect x="58" y="175" width="124" height="9" rx="2.5" fill="#1A3328"/>
+  <rect x="58" y="175" width="124" height="1.6" rx=".8" fill="url(#gold)" opacity=".85"/>
+
+  <ellipse cx="120" cy="104" rx="38" ry="52" fill="url(#warm)"/>
+  <!-- Alif ا : extrusion + face + highlight -->
+  <path d="M126.5 58 C131.5 57 134.5 60.5 133.5 65.5 L125 150 C124.4 155.5 117.4 155.5 117.2 150 L119.6 68 C119.8 62 122 58.6 126.5 58 Z" fill="#7E5E30" transform="translate(3.2 3)"/>
+  <path d="M126.5 58 C131.5 57 134.5 60.5 133.5 65.5 L125 150 C124.4 155.5 117.4 155.5 117.2 150 L119.6 68 C119.8 62 122 58.6 126.5 58 Z" fill="#9C7A45" transform="translate(1.6 1.5)"/>
+  <path d="M126.5 58 C131.5 57 134.5 60.5 133.5 65.5 L125 150 C124.4 155.5 117.4 155.5 117.2 150 L119.6 68 C119.8 62 122 58.6 126.5 58 Z" fill="url(#goldV)"/>
+  <path d="M127 61 C129.6 60.6 130.8 62.4 130.4 65 L123.6 140" fill="none" stroke="#FFF6DF" stroke-width="1.3" stroke-linecap="round" opacity=".9"/>
+  
+  <g filter="url(#drop)">
+    <!-- bottom book -->
+    <path d="M96 181 L103 176 V164 L96 169 Z" fill="#F6EEDD"/>
+    <rect x="32" y="169" width="64" height="13" rx="3" fill="#213E32"/>
+    <rect x="32" y="169" width="64" height="3" rx="1.5" fill="#3C6B53"/>
+    <rect x="40" y="169" width="2.2" height="13" fill="url(#gold)"/><rect x="85" y="169" width="2.2" height="13" fill="url(#gold)"/>
+    <path d="M97 172 L102 168.5 M97 175 L102 171.5 M97 178 L102 174.5" stroke="#D8CBB2" stroke-width=".6"/>
+    <!-- middle book -->
+    <path d="M93 168 L99 163.5 V152.5 L93 157 Z" fill="#F6EEDD"/>
+    <rect x="38" y="157" width="55" height="12" rx="3" fill="#567B62"/>
+    <rect x="38" y="157" width="55" height="2.6" rx="1.3" fill="#7A9C84"/>
+    <rect x="46" y="157" width="2" height="12" fill="url(#gold)"/><rect x="82" y="157" width="2" height="12" fill="url(#gold)"/>
+    <path d="M94 160 L98.5 156.5 M94 163 L98.5 159.5" stroke="#D8CBB2" stroke-width=".6"/>
+    <!-- top book (tilted) -->
+    <g transform="rotate(-5 64 150)">
+      <path d="M41 146 L47 141 H97 L91 146 Z" fill="#D2B585"/>
+      <path d="M91 146 L97 141 V151 L91 156 Z" fill="#F6EEDD"/>
+      <rect x="35" y="146" width="56" height="10.5" rx="2.6" fill="#A97F4B"/>
+      <rect x="35" y="146" width="56" height="2.4" rx="1.2" fill="#C49B63"/>
+      <rect x="55" y="149" width="16" height="4.4" rx="1" fill="none" stroke="#F1DDB0" stroke-width=".8"/>
+    </g>
+  </g>
+  
+  <!-- quill (behind pot neck) -->
+  <g filter="url(#dropS)">
+    <path d="M170 160 C167 128 187 101 210 86 C208 114 195 140 171 160 Z" fill="url(#quill)"/>
+    <path d="M170 160 C167 128 187 101 210 86" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".9"/>
+    <path d="M168 168 Q186 128 209 88" fill="none" stroke="url(#gold)" stroke-width="1.5" stroke-linecap="round"/>
+    <g stroke="#C9B48F" stroke-width=".6" opacity=".7" fill="none">
+      <path d="M176 146 L172 140"/><path d="M180 138 L175 131"/><path d="M185 129 L180 122"/><path d="M190 121 L186 113"/><path d="M196 112 L192 105"/>
+      <path d="M178 145 L186 143"/><path d="M183 136 L192 133"/><path d="M188 127 L197 123"/><path d="M194 117 L202 112"/>
+    </g>
+  </g>
+  <!-- inkpot -->
+  <g filter="url(#drop)">
+    <ellipse cx="168" cy="191" rx="17" ry="4.5" fill="#0C1A14"/>
+    <path d="M151 191 C149 178 154 170 168 170 C182 170 187 178 185 191 Z" fill="url(#glass)"/>
+    <path d="M156 186 C155 179 158 174 164 173" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity=".35"/>
+    <rect x="161" y="162" width="14" height="9" rx="2" fill="url(#goldV)"/>
+    <ellipse cx="168" cy="162" rx="8.5" ry="2.6" fill="#F3DFB2"/>
+    <ellipse cx="168" cy="162.2" rx="5.5" ry="1.6" fill="#0C1A14"/>
+    <path d="M168 168 L169.4 162.4" stroke="url(#gold)" stroke-width="1.6"/>
+    <path d="M154 181 H182" stroke="url(#gold)" stroke-width="1" opacity=".7"/>
+  </g>
+  <path d="M204 53 Q204.9 57.1 209 58 Q204.9 58.9 204 63 Q203.1 58.9 199 58 Q203.1 57.1 204 53 Z" fill="#E7CF9C" opacity="1"/><path d="M40 116 Q40.72 119.28 44 120 Q40.72 120.72 40 124 Q39.28 120.72 36 120 Q39.28 119.28 40 116 Z" fill="#E7CF9C" opacity="0.8"/><path d="M148 67 Q148.54 69.46 151 70 Q148.54 70.54 148 73 Q147.46 70.54 145 70 Q147.46 69.46 148 67 Z" fill="#E7CF9C" opacity="0.9"/><path d="M30 67 Q30.54 69.46 33 70 Q30.54 70.54 30 73 Q29.46 70.54 27 70 Q29.46 69.46 30 67 Z" fill="#E7CF9C" opacity="0.6"/>
+</svg>
