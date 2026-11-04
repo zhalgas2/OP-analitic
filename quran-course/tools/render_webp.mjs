@@ -11,7 +11,7 @@ const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'assets', 'illus
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
-for (const name of ['alippe', 'tajweed', 'quran']) {
+for (const name of ['alippe', 'iqro', 'tajweed', 'quran']) {
   const svg = readFileSync(join(dir, `${name}.svg`), 'utf8');
   for (const size of [320, 640]) {
     const dataUrl = await page.evaluate(async ({ svg, size }) => {

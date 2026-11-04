@@ -324,3 +324,63 @@ main { max-width: 760px; margin: 0 auto; padding: 20px var(--gutter) 0; outline:
   body { padding-bottom: calc(var(--nav-h) + 48px); }
   .toast { bottom: calc(var(--nav-h) + 30px); }
 }
+
+/* ---------- Iqro path ---------- */
+.path { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; position: relative; }
+.path::before { content: ""; position: absolute; left: 33px; top: 24px; bottom: 24px; border-left: 2.5px dashed rgba(201, 166, 107, .55); }
+.path-step { position: relative; }
+.path-card {
+  display: grid; grid-template-columns: 48px 1fr auto; gap: 14px; align-items: center;
+  padding: 12px 14px 12px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow-sm);
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+a.path-card:active { transform: scale(.985); }
+@media (hover: hover) { a.path-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); } }
+.path-card .node {
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font: 700 1.15rem Lora, serif;
+  background: #F1EBDF; color: var(--forest); border: 2px solid var(--card); box-shadow: 0 0 0 2px var(--beige); position: relative; z-index: 1;
+}
+.path-card.next .node { background: var(--forest); color: var(--cream); box-shadow: 0 0 0 3px var(--gold), 0 6px 16px rgba(33, 62, 50, .3); animation: pulse 2.4s var(--ease) infinite; }
+.path-card.done .node { background: var(--sage); box-shadow: 0 0 0 2px var(--gold); }
+.path-card .node svg { width: 22px; height: 22px; fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.path-card.locked { opacity: .55; box-shadow: none; }
+.path-text { min-width: 0; display: grid; gap: 2px; }
+.path-text b { font-weight: 600; color: var(--ink); }
+.path-text small.ar { font-size: 1.25rem; color: var(--sage); line-height: 1.5; text-align: left; direction: rtl; justify-self: start; }
+.lock svg { width: 20px; height: 20px; fill: none; stroke: var(--ink-soft); stroke-width: 1.8; }
+.stars { display: inline-flex; gap: 2px; }
+.stars svg { width: 16px; height: 16px; fill: #E4DACA; }
+.stars svg.on { fill: var(--gold); }
+.toast .stars { vertical-align: -3px; margin-left: 4px; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+@media (min-width: 768px) {
+  .path { gap: 16px; }
+  .path::before { left: 50%; }
+  .path-step { width: calc(50% + 24px); }
+  .path-step.alt { margin-left: auto; }
+  .path-step:not(.alt) .path-card { grid-template-columns: auto 1fr 48px; text-align: right; padding: 12px 10px 12px 14px; }
+  .path-step:not(.alt) .node { order: 3; }
+  .path-step:not(.alt) .pill, .path-step:not(.alt) .lock { order: -1; }
+  .path-step:not(.alt) .path-text small.ar { justify-self: end; }
+  .path-step:not(.alt) .stars { justify-self: end; }
+}
+
+/* ---------- syllable board ---------- */
+.hint { margin: 0 2px 10px; font-size: .88rem; color: var(--ink-soft); }
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; direction: rtl; }
+.syl {
+  direction: ltr; display: grid; justify-items: center; gap: 0; padding: 6px 4px 10px; cursor: pointer;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 18px; box-shadow: var(--shadow-sm); color: var(--ink);
+  transition: transform .2s var(--ease), border-color .2s, background .2s;
+}
+.syl .ar { font-size: 2.3rem; line-height: 1.6; color: var(--forest); }
+.syl small { font-size: .8rem; font-weight: 600; color: var(--sage); }
+.syl:active { transform: scale(.94); }
+.syl.read { border-color: var(--gold); background: #FBF6EA; }
+.board-count { text-align: center; font-size: .85rem; font-weight: 600; color: var(--sage); margin: 10px 0 0; }
+.listen {
+  clear: both; display: flex; align-items: center; gap: 8px; margin: 0 auto 12px; padding: 8px 16px; min-height: 44px;
+  border-radius: 999px; border: 1.5px solid var(--gold); background: #FBF6EA; color: var(--forest); font-weight: 600; cursor: pointer;
+}
+.listen svg { width: 20px; height: 20px; fill: none; stroke: var(--forest); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.q:has(.listen) .options { clear: both; }

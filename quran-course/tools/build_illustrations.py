@@ -323,8 +323,49 @@ def quran():
     return svg(body, extra)
 
 
+# ---------------------------------------------------------------- Иқро
+def iqro():
+    steps = []
+    for i in range(6):
+        x = 84 + i * 12.2
+        top = 168 - (i + 1) * 13
+        h = 176 - top
+        steps.append(
+            f'<path d="M{x+12} {top} L{x+16} {top-3} V{176-3} L{x+12} 176 Z" fill="#CDBB9C"/>'
+            f'<path d="M{x} {top} L{x+4} {top-3} H{x+16} L{x+12} {top} Z" fill="#FFFDF7"/>'
+            f'<rect x="{x}" y="{top}" width="12.2" height="{h}" fill="url(#stepFace)"/>'
+            f'<rect x="{x}" y="{top}" width="12.2" height="1.4" fill="url(#gold)"/>'
+            f'<circle cx="{x+6.1}" cy="{top+7}" r="{1.3 + i*0.18:.2f}" fill="url(#gold)" opacity=".9"/>')
+    star = ("M150 52 L154.6 62 L165.5 63.2 L157.4 70.6 L159.7 81.4 L150 75.9 L140.3 81.4 "
+            "L142.6 70.6 L134.5 63.2 L145.4 62 Z")
+    book = f"""
+  <g filter="url(#drop)">
+    <path d="M36 182 L68 186 L100 182 L100 176 L68 180 L36 176 Z" fill="#E8DCC4"/>
+    <path d="M68 180 C58 172 46 170 34 172 L36 176 C48 174 58 176 68 180 Z" fill="url(#cover2)"/>
+    <path d="M68 180 C78 172 90 170 102 172 L100 176 C88 174 78 176 68 180 Z" fill="url(#cover2)"/>
+    <path d="M68 178 C58 166 47 163 37 164 L36 172 C47 171 58 173 68 178 Z" fill="#FFFDF7"/>
+    <path d="M68 178 C78 166 89 163 99 164 L100 172 C89 171 78 173 68 178 Z" fill="#F3EAD7"/>
+    <path d="M42 168 Q52 167 62 172 M42 171 Q52 170 62 174 M74 172 Q84 167 94 168 M74 174 Q84 170 94 171" stroke="#8A7A5E" stroke-width=".8" stroke-dasharray="3 1.4" opacity=".45" fill="none"/>
+    <path d="M100 170 L118 140" stroke="#8D5A30" stroke-width="2.4" stroke-linecap="round"/>
+    <circle cx="118.6" cy="139" r="2" fill="url(#gold)"/>
+  </g>"""
+    body = f"""
+  <ellipse cx="150" cy="70" rx="34" ry="34" fill="url(#warm)"/>
+  <g filter="url(#dropS)">{''.join(steps)}</g>
+  <path d="{star}" fill="#7E5E30" transform="translate(1.6 1.6)"/>
+  <path d="{star}" fill="url(#goldV)"/>
+  <path d="M150 56 L153.4 63.4" stroke="#FFF6DF" stroke-width="1.2" stroke-linecap="round"/>
+  {book}
+  {sparkle(200, 60, 4.5)}{sparkle(100, 78, 3, .8)}{sparkle(190, 140, 3.5, .7)}{sparkle(34, 120, 3, .6)}
+"""
+    extra = f"""
+  <linearGradient id="stepFace" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7F0E2"/><stop offset="1" stop-color="#E2D4BA"/></linearGradient>
+  <linearGradient id="cover2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3F7159"/><stop offset="1" stop-color="#16291F"/></linearGradient>"""
+    return svg(body, extra)
+
+
 if __name__ == "__main__":
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [("alippe", alippe), ("tajweed", tajweed), ("quran", quran)]:
+    for name, fn in [("alippe", alippe), ("iqro", iqro), ("tajweed", tajweed), ("quran", quran)]:
         (OUT / f"{name}.svg").write_text(fn(), encoding="utf-8")
         print("wrote", OUT / f"{name}.svg")

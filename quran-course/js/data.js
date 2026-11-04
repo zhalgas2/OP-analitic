@@ -124,11 +124,90 @@
     surah('q5', 'Ән-Нас', 114, 6, 'Адамдардың Раббысына сыйынып, сыбырлаушы шайтаннан пана сұрау туралы.'),
   ];
 
+
+  /* ---------- Иқро: 6-деңгейлі оқу жолы (буын → сөз) ---------- */
+  // [letter, Kazakh consonant sound]; alif is written as hamza-alif (أ) with harakat.
+  const SOUNDS = [
+    ['أ', ''], ['ب', 'б'], ['ت', 'т'], ['ث', 'с'], ['ج', 'ж'], ['ح', 'х'], ['خ', 'х'],
+    ['د', 'д'], ['ذ', 'з'], ['ر', 'р'], ['ز', 'з'], ['س', 'с'], ['ش', 'ш'], ['ص', 'с'],
+    ['ض', 'д'], ['ط', 'т'], ['ظ', 'з'], ['ع', '‘'], ['غ', 'ғ'], ['ف', 'ф'], ['ق', 'қ'],
+    ['ك', 'к'], ['ل', 'л'], ['م', 'м'], ['ن', 'н'], ['ه', 'һ'], ['و', 'у'], ['ي', 'й'],
+  ];
+  const FATHA = 'َ', KASRA = 'ِ', DAMMA = 'ُ', SUKUN = 'ْ', SHADDA = 'ّ';
+  const TAN_F = 'ً', TAN_K = 'ٍ', TAN_D = 'ٌ';
+  const cons = SOUNDS.slice(1);
+
+  const syl = (l, mark, v) => ({ ar: l[0] + mark, tr: l[1] + v });
+  const levels = [
+    {
+      title: 'Фатха', subtitle: 'بَ تَ ثَ', intro: 'Әр әріптің үстіндегі қиғаш сызық — <b>фатха</b>, «а» деп оқылады. Буынды басып, тыңдап, дауыстап қайталаңыз.',
+      items: SOUNDS.map(l => syl(l, FATHA, 'а')),
+    },
+    {
+      title: 'Қосылған әріптер', subtitle: 'بَتَ · كَتَبَ', intro: 'Әріптер сөз ішінде бір-бірімен жалғасып жазылады. Фатхалы буындарды қосып оқыңыз.',
+      items: [[1, 2], [3, 4], [5, 6], [7, 9], [11, 12], [19, 20], [21, 22], [23, 24], [25, 27], [21, 2, 1], [24, 11, 9], [4, 23, 17], [22, 20, 19], [12, 9, 1], [10, 9, 17]]
+        .map(ix => ({ ar: ix.map(i => SOUNDS[i][0] + FATHA).join(''), tr: ix.map(i => SOUNDS[i][1] + 'а').join('') })),
+    },
+    {
+      title: 'Касра мен дамма', subtitle: 'بِ · بُ', intro: 'Әріп астындағы сызық — <b>касра</b> («и»), үстіндегі кішкентай уау — <b>дамма</b> («у»).',
+      items: cons.slice(0, 14).flatMap(l => [syl(l, KASRA, 'и'), syl(l, DAMMA, 'у')]),
+    },
+    {
+      title: 'Тәнуин', subtitle: 'بً · بٍ · بٌ', intro: 'Қосарланған харакат — <b>тәнуин</b>: соңына «н» дыбысы қосылады: «ан», «ин», «ун».',
+      items: cons.slice(0, 10).flatMap(l => [syl(l, TAN_F, 'ан'), syl(l, TAN_K, 'ин'), syl(l, TAN_D, 'ун')]),
+    },
+    {
+      title: 'Сукун', subtitle: 'أَبْ', intro: 'Әріп үстіндегі кішкентай шеңбер — <b>сукун</b>: әріп дауыссыз, алдыңғы буынға қосылып оқылады.',
+      items: cons.map(l => ({ ar: 'أَ' + l[0] + SUKUN, tr: 'а' + l[1] })),
+    },
+    {
+      title: 'Шәдда', subtitle: 'أَبَّ', intro: '<b>Шәдда</b> (ّ) әріпті екі рет оқытады: бірінші рет сукунмен, екінші рет өз харакатымен.',
+      items: cons.slice(0, 20).map(l => ({ ar: 'أَ' + l[0] + SHADDA + FATHA, tr: 'а' + l[1] + l[1] + 'а' })),
+    },
+  ];
+
+  function iqroQuiz(items, seed) {
+    // Distinct transliterations only, so every question has exactly one right answer.
+    const uniq = [];
+    items.forEach(it => { if (!uniq.some(u => u.tr === it.tr)) uniq.push(it); });
+    const picks = [];
+    const want = Math.min(5, uniq.length);
+    // Spread picks across the level; the final sweep guarantees the loop ends.
+    for (let k = 0; k < uniq.length * 2 && picks.length < want; k++) {
+      const it = k < uniq.length ? uniq[(seed * 3 + k * Math.ceil(uniq.length / want)) % uniq.length] : uniq[k - uniq.length];
+      if (!picks.includes(it)) picks.push(it);
+    }
+    return picks.map((it, qi) => {
+      const others = uniq.filter(u => u !== it);
+      const wrong = [0, 1, 2].map(j => others[(qi * 5 + j * 4 + seed) % others.length]);
+      const set = [it, ...new Set(wrong)].slice(0, 4);
+      const shift = (qi + seed) % set.length;
+      const opts = set.slice(shift).concat(set.slice(0, shift));
+      return { q: `«${it.tr}» деп оқылатынын таңдаңыз`, say: it.ar, options: opts.map(o => o.ar), answer: opts.indexOf(it), arabicOptions: true };
+    });
+  }
+
+  const iqroLessons = levels.map((lv, i) => ({
+    id: 'i' + (i + 1),
+    title: `${i + 1}-деңгей: ${lv.title}`,
+    subtitle: lv.subtitle,
+    duration: `${lv.items.length} буын`,
+    video: null,
+    body: `<p>${lv.intro}</p>`,
+    board: lv.items,
+    quiz: iqroQuiz(lv.items, i + 1),
+  }));
+
   window.COURSES = [
     {
       id: 'alippe', title: 'Әліппе', image: 'alippe',
       desc: 'Араб әріптерін танып, дұрыс оқу мен жазуды үйреніңіз',
       lessons: alippeLessons,
+    },
+    {
+      id: 'iqro', title: 'Иқро', image: 'iqro', layout: 'path',
+      desc: 'Буыннан сөзге: 6 деңгейде Құран оқуды үйренетін жол',
+      lessons: iqroLessons,
     },
     {
       id: 'tajweed', title: 'Тәжуид', image: 'tajweed',
@@ -148,6 +227,7 @@
     { id: 'streak3', title: '3 күн қатарынан', desc: 'Үш күн үзбей оқыдыңыз' },
     { id: 'alippe', title: 'Әліппе шебері', desc: 'Әліппе курсын толық аяқтадыңыз' },
     { id: 'tajweed', title: 'Тәжуид білгірі', desc: 'Тәжуид курсын толық аяқтадыңыз' },
+    { id: 'iqro', title: 'Иқро жолы', desc: 'Иқроның 6 деңгейін аяқтадыңыз' },
     { id: 'quran', title: 'Сүре жаттаушы', desc: 'Құран курсын толық аяқтадыңыз' },
     { id: 'all', title: 'Толық курс', desc: 'Барлық курсты аяқтадыңыз' },
   ];

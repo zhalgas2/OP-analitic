@@ -48,6 +48,27 @@
     toast.t = setTimeout(() => toastEl.classList.remove('show'), 3200);
   }
 
+  /* ---------- audio (device Arabic voice, if present) ---------- */
+  let arVoice = null;
+  function pickVoice() {
+    if (!('speechSynthesis' in window)) return;
+    arVoice = speechSynthesis.getVoices().find(v => /^ar/i.test(v.lang)) || null;
+  }
+  if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.addEventListener?.('voiceschanged', pickVoice); }
+  function speak(text) {
+    if (!arVoice) { toast('Бұл құрылғыда араб дауысы жоқ — буынды өзіңіз дауыстап оқыңыз'); return false; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = arVoice; u.lang = arVoice.lang; u.rate = .7;
+    speechSynthesis.speak(u);
+    return true;
+  }
+  const speaker = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4Z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+  const starsFor = score => score >= 100 ? 3 : score >= 60 ? 2 : 1;
+  function starRow(n) {
+    return `<span class="stars" aria-label="${n} жұлдыз">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" class="${i <= n ? 'on' : ''}" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8l-5.4 2.9 1.1-6.1L3.2 9.4l6.1-.8Z"/></svg>`).join('')}</span>`;
+  }
+
   /* ---------- views ---------- */
   function home() {
     const name = Store.state.name;
@@ -85,6 +106,7 @@
     const c = byId(id);
     if (!c) return notFound();
     const nextIdx = c.lessons.findIndex(l => !Store.isDone(c.id, l.id));
+    if (c.layout === 'path') return coursePath(c, nextIdx);
     return `
       ${back('#home', 'Басты бет')}
       <section class="course-header enter" style="--d:0">
@@ -114,6 +136,40 @@
       </ol>`;
   }
 
+  function header(c) {
+    return `<section class="course-header enter" style="--d:0">
+        <div class="course-header-art">${illustration(c, 'lg')}</div>
+        <div class="course-header-text">
+          <h1>${c.title}</h1>
+          <p>${c.desc}</p>
+          ${progressBar(c)}
+        </div>
+      </section>`;
+  }
+
+  function coursePath(c, nextIdx) {
+    const done = Store.state.completed[c.id] || {};
+    return `
+      ${back('#home', 'Басты бет')}
+      ${header(c)}
+      <h2 class="section-title enter" style="--d:1">Оқу жолы</h2>
+      <ol class="path">
+        ${c.lessons.map((l, i) => {
+          const rec = done[l.id];
+          const locked = !rec && i > (nextIdx === -1 ? c.lessons.length : nextIdx);
+          const state = rec ? 'done' : i === nextIdx ? 'next' : locked ? 'locked' : '';
+          const inner = `<span class="node">${rec ? check : i + 1}</span>
+              <span class="path-text"><b>${esc(l.title)}</b><small class="ar">${esc(l.subtitle)}</small>${rec ? starRow(starsFor(rec.score)) : ''}</span>`;
+          return `<li class="path-step enter ${i % 2 ? 'alt' : ''}" style="--d:${i + 2}">
+            ${locked
+              ? `<div class="path-card locked" aria-disabled="true">${inner}<span class="lock" aria-label="Жабық">${lockIcon}</span></div>`
+              : `<a class="path-card ${state}" href="#lesson-${c.id}-${l.id}">${inner}${i === nextIdx ? '<span class="pill pill-gold">Бастау</span>' : ''}</a>`}
+          </li>`;
+        }).join('')}
+      </ol>`;
+  }
+  const lockIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>';
+
   function videoBlock(l) {
     if (l.video && l.video.youtube) {
       return `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(l.video.youtube)}" title="${esc(l.title)}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>`;
@@ -139,6 +195,9 @@
         <h1>${esc(l.title)}</h1>
         ${videoBlock(l)}
         <div class="lesson-body">${l.body}</div>
+        ${l.board ? `<p class="hint">Буынды басыңыз — тыңдап, дауыстап қайталаңыз. Оқылғандары белгіленеді.</p>
+          <div class="board">${l.board.map((b, bi) => `<button type="button" class="syl" data-say="${esc(b.ar)}" data-bi="${bi}"><span class="ar">${b.ar}</span><small>${esc(b.tr)}</small></button>`).join('')}</div>
+          <p class="board-count" aria-live="polite"><span>0</span> / ${l.board.length} оқылды</p>` : ''}
         ${l.letters ? `<div class="letters">${l.letters.map(([ch, n]) => `<div class="letter"><span class="ar">${ch}</span><small>${n}</small></div>`).join('')}</div>` : ''}
       </article>
       <section class="quiz enter" style="--d:1" data-total="${l.quiz.length}">
@@ -147,6 +206,7 @@
           <fieldset class="q" data-answer="${q.answer}">
             <legend>${qi + 1}. ${esc(q.q)}</legend>
             ${q.arabic ? `<div class="q-arabic ar">${q.arabic}</div>` : ''}
+            ${q.say ? `<button type="button" class="listen" data-say="${esc(q.say)}">${speaker}<span>Тыңдау</span></button>` : ''}
             <div class="options">
               ${q.options.map((o, oi) => `<button type="button" class="opt ${q.arabicOptions ? 'ar' : ''}" data-i="${oi}">${esc(o)}</button>`).join('')}
             </div>
@@ -163,6 +223,13 @@
     const quiz = view.querySelector('.quiz');
     const btn = document.getElementById('completeBtn');
     const scoreEl = quiz.querySelector('.score');
+    const read = new Set();
+    view.querySelectorAll('.syl').forEach(b => b.addEventListener('click', () => {
+      speak(b.dataset.say);
+      b.classList.add('read'); read.add(b.dataset.bi);
+      const cnt = view.querySelector('.board-count span'); if (cnt) cnt.textContent = read.size;
+    }));
+    view.querySelectorAll('.listen').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); speak(b.dataset.say); }));
     let answered = 0, correct = 0;
     const total = +quiz.dataset.total;
     quiz.querySelectorAll('.q').forEach(fs => {
@@ -188,7 +255,8 @@
       const newly = Store.complete(c, lid, score);
       updateChrome();
       const names = newly.map(id => (ACHIEVEMENTS.find(a => a.id === id) || {}).title).filter(Boolean);
-      toast(names.length ? `<b>Жаңа жетістік!</b> ${names.map(esc).join(', ')}` : '<b>Жарайсыз!</b> Сабақ аяқталды');
+      const stars = c.layout === 'path' ? ' ' + starRow(starsFor(score)) : '';
+      toast(names.length ? `<b>Жаңа жетістік!</b> ${names.map(esc).join(', ')}${stars}` : `<b>Жарайсыз!</b> Деңгей аяқталды${stars}`);
       go('#course-' + cid);
     });
   }
